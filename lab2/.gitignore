@@ -53,5 +53,4 @@ performance_results.csv
 # Generated graphs
 *.png
 *.jpg
-*.pdf
 !report/*.pdf
