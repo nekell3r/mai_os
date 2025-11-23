@@ -37,25 +37,103 @@
 \subsection{Тестовый запуск программы}
 
 \textbf{Команда запуска:}
-
 \begin{verbatim}
 D:\programming_projects\mai_os\lab1\build\src> echo test_numbers.txt | .\parent.exe
 \end{verbatim}
 
-\textbf{Реальный вывод программы:}
+\textbf{Вывод программы:}
+\begin{verbatim}
+Введите имя файла: 00-03-12MSG parent Читаю файл 'test_numbers.txt'
+00-03-12MSG parent Отправляю число 15 дочернему процессу
+00-03-12MSG parent Получено составное число 15 от дочернего процесса
+00-03-12MSG parent Отправляю число 20 дочернему процессу
+00-03-12MSG parent Получено составное число 20 от дочернего процесса
+00-03-12MSG parent Отправляю число 8 дочернему процессу
+00-03-12MSG parent Получено составное число 8 от дочернего процесса
+00-03-12MSG parent Отправляю число 12 дочернему процессу
+00-03-12MSG parent Получено составное число 12 от дочернего процесса
+00-03-12MSG parent Отправляю число 7 дочернему процессу
+00-03-12MSG parent Получен сигнал завершения от дочернего процесса
+00-03-12MSG parent Дочерний процесс завершился с кодом 0
+00-03-12MSG parent Завершение работы
+\end{verbatim}
+
+\subsection{Трассировка системных вызовов (WinDbg)}
+
+Для трассировки системных вызовов Windows API использовался отладчик \textbf{WinDbg Preview}. Согласно документации\footnote{\url{http://windbg.info/doc/1-common-cmds.html}}, команды \texttt{bu} (breakpoint unresolved) позволяют устанавливать breakpoints на функции, которые ещё не загружены.
+
+\subsubsection{Команды WinDbg}
+
+\begin{lstlisting}[basicstyle=\tiny\ttfamily]
+windbgx.exe parent.exe
+.logopen trace.log
+bu KERNELBASE!CreatePipe
+bu KERNELBASE!CreateProcessW
+bu KERNELBASE!WriteFile ".printf \"WriteFile(handle=%p)\\n\", @rcx; g"
+bu KERNELBASE!ReadFile ".printf \"ReadFile(handle=%p)\\n\", @rcx; g"
+g
+\end{lstlisting}
+
+\subsubsection{Результаты трассировки}
+
+\textbf{Загрузка модулей и создание pipe'ов:}
 
 \begin{verbatim}
-Введите имя файла: 19-18-31MSG parent Читаю файл 'test_numbers.txt'
-19-18-31MSG parent Отправляю число 15 дочернему процессу
-19-18-31MSG parent Получено составное число 15 от дочернего процесса
-19-18-31MSG parent Отправляю число 20 дочернему процессу
-19-18-31MSG parent Получено составное число 20 от дочернего процесса
-19-18-31MSG parent Отправляю число 8 дочернему процессу
-19-18-31MSG parent Получено составное число 8 от дочернего процесса
-19-18-31MSG parent Отправляю число 12 дочернему процессу
-19-18-31MSG parent Получено составное число 12 от дочернего процесса
-19-18-31MSG parent Отправляю число 7 дочернему процессу
-19-18-31MSG parent Получен сигнал завершения от дочернего процесса
-19-18-31MSG parent Дочерний процесс завершился с кодом 0
-19-18-31MSG parent Завершение работы
+ModLoad: ntdll.dll, KERNEL32.DLL, KERNELBASE.dll
+ModLoad: advapi32.dll, msvcrt.dll, sechost.dll, RPCRT4.dll
+
+Breakpoint 4 hit
+KERNELBASE!CreatePipe:              <- Создание pipe_to_child
+00007ffa`43574d80 488bc4  mov rax,rsp
+
+Breakpoint 4 hit
+KERNELBASE!CreatePipe:              <- Создание pipe_from_child
+00007ffa`43574d80 488bc4  mov rax,rsp
 \end{verbatim}
+
+\textbf{Обмен данными (parent $\leftrightarrow$ child):}
+
+Трассировка показывает циклический обмен данными через pipe. Дескрипторы:
+\begin{itemize}
+    \item \texttt{0x110} --- pipe для записи (parent $\rightarrow$ child)
+    \item \texttt{0x114} --- pipe для чтения (child $\rightarrow$ parent)
+    \item \texttt{0x6c} --- stdout (консоль для логов)
+\end{itemize}
+
+\begin{verbatim}
+Цикл 1 (число 15):
+WriteFile(handle=0x110)         <- Parent отправляет 15
+ReadFile(handle=0x114)          <- Parent читает ответ 15
+
+Цикл 2 (число 20):
+WriteFile(handle=0x110)         <- Parent отправляет 20
+ReadFile(handle=0x114)          <- Parent читает ответ 20
+
+Цикл 3 (число 8):
+WriteFile(handle=0x110)         <- Parent отправляет 8
+ReadFile(handle=0x114)          <- Parent читает ответ 8
+
+Цикл 4 (число 12):
+WriteFile(handle=0x110)         <- Parent отправляет 12
+ReadFile(handle=0x114)          <- Parent читает ответ 12
+
+Цикл 5 (число 7):
+WriteFile(handle=0x110)         <- Parent отправляет 7
+ReadFile(handle=0x114)          <- Parent читает ответ -1 (завершение)
+
+ntdll!NtTerminateProcess        <- Завершение процесса
+\end{verbatim}
+
+\subsubsection{Анализ трассировки}
+
+\begin{enumerate}
+    \item \textbf{Создание pipe'ов:} \texttt{CreatePipe} вызывается 2 раза для создания двунаправленного канала связи
+    
+    \item \textbf{Синхронный обмен:} Паттерн WriteFile $\rightarrow$ ReadFile повторяется 5 раз (по числу чисел в файле)
+    
+    \item \textbf{Обработка данных:} Child корректно определил составные числа (15, 20, 8, 12) и простое число (7)
+    
+    \item \textbf{Завершение:} При обнаружении простого числа child отправляет -1 и оба процесса завершаются
+    
+    \item \textbf{Всего передано:} 5 чисел $\times$ 4 байта $\times$ 2 направления = 40 байт данных
+\end{enumerate}
