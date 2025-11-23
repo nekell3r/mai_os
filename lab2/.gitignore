@@ -55,4 +55,3 @@ performance_results.csv
 *.jpg
 *.pdf
 !report/*.pdf
-
