@@ -1,5 +1,173 @@
 \section{Метод решения}
-Общее описание алгоритма решения задачи, архитектуры программы и т. п. Полностью расписывать алгоритмы необязательно, но в общих чертах описать нужно. Приветствуются ссылки на внешние источники, использованные при подготовке (книги, интернет-ресурсы).
+
+\subsection{Общее описание алгоритма}
+
+Программа реализует классическую схему межпроцессного взаимодействия типа <<producer-consumer>> на платформе Windows с использованием неименованных каналов (anonymous pipes).
+
+\textbf{Архитектура решения:}
+
+\begin{enumerate}
+    \item \textbf{Родительский процесс (parent.exe):}
+    \begin{itemize}
+        \item Запрашивает имя файла с числами
+        \item Создаёт два pipe для двусторонней связи с child
+        \item Запускает дочерний процесс через \texttt{CreateProcess()}
+        \item Перенаправляет stdin/stdout дочернего процесса на pipe'ы
+        \item Читает числа из файла и отправляет их child'у
+        \item Получает ответы от child'а и выводит их
+        \item Завершает работу при получении сигнала -1
+    \end{itemize}
+    
+    \item \textbf{Дочерний процесс (child.exe):}
+    \begin{itemize}
+        \item Читает числа из перенаправленного stdin
+        \item Проверяет каждое число на простоту
+        \item Если число составное --- отправляет его обратно
+        \item Если число простое или отрицательное --- отправляет -1 и завершается
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Схема взаимодействия:}
+
+\begin{verbatim}
+User -> parent.exe -> pipe_to_child -> child.exe
+                                          |
+parent.exe <- pipe_from_child <-----------+
+\end{verbatim}
+
+\subsection{Алгоритм проверки простоты числа}
+
+Используется классический алгоритм:
+\begin{enumerate}
+    \item Числа меньше 2 --- не простые
+    \item Число 2 --- простое
+    \item Чётные числа --- не простые
+    \item Для нечётных проверяем делимость на все нечётные числа от 3 до $\sqrt{n}$
+\end{enumerate}
+
+Сложность: $O(\sqrt{n})$
 
 \section{Описание программы}
-Разделение по файлам, описание основных типов данных и функций. Обязательно написать используемые системные вызовы.
+
+\subsection{Структура проекта}
+
+Проект организован по модульному принципу:
+
+\begin{itemize}
+    \item \texttt{common/} --- вспомогательные модули (логирование, обработка ошибок)
+    \item \texttt{src/parent.cpp} --- родительский процесс
+    \item \texttt{src/child.cpp} --- дочерний процесс
+\end{itemize}
+
+\subsection{Основные типы данных}
+
+\begin{itemize}
+    \item \texttt{HANDLE} --- дескриптор Windows-объекта (pipe, процесс, поток)
+    \item \texttt{SECURITY\_ATTRIBUTES} --- атрибуты безопасности для pipe
+    \item \texttt{STARTUPINFO} --- информация для запуска процесса (перенаправление stdin/stdout)
+    \item \texttt{PROCESS\_INFORMATION} --- информация о созданном процессе
+\end{itemize}
+
+\subsection{Основные функции}
+
+\textbf{В parent.cpp:}
+\begin{itemize}
+    \item \texttt{main()} --- основная функция родительского процесса
+    \begin{itemize}
+        \item Создаёт pipe'ы через \texttt{CreatePipe()}
+        \item Настраивает наследование дескрипторов через \texttt{SetHandleInformation()}
+        \item Запускает child через \texttt{CreateProcess()}
+        \item Организует обмен данными через \texttt{ReadFile()} и \texttt{WriteFile()}
+    \end{itemize}
+\end{itemize}
+
+\textbf{В child.cpp:}
+\begin{itemize}
+    \item \texttt{is\_prime(int n)} --- проверка числа на простоту
+    \item \texttt{main()} --- основная функция дочернего процесса
+    \begin{itemize}
+        \item Получает дескрипторы stdin/stdout через \texttt{GetStdHandle()}
+        \item Читает числа из stdin
+        \item Проверяет условия завершения
+        \item Отправляет результаты в stdout
+    \end{itemize}
+\end{itemize}
+
+\subsection{Системные вызовы Windows API}
+
+\begin{enumerate}
+    \item \texttt{CreatePipe()} --- создание неименованного канала (pipe)
+    \begin{itemize}
+        \item Параметры: указатели на read/write дескрипторы, атрибуты безопасности, размер буфера
+        \item Возвращает: TRUE при успехе
+    \end{itemize}
+    
+    \item \texttt{SetHandleInformation()} --- управление наследованием дескрипторов
+    \begin{itemize}
+        \item Позволяет явно указать, какие дескрипторы наследуются дочерним процессом
+        \item Используется флаг \texttt{HANDLE\_FLAG\_INHERIT}
+    \end{itemize}
+    
+    \item \texttt{CreateProcess()} --- создание нового процесса
+    \begin{itemize}
+        \item Параметры: путь к exe, аргументы, атрибуты безопасности, флаги, окружение, рабочая директория, STARTUPINFO, PROCESS\_INFORMATION
+        \item Позволяет перенаправить stdin/stdout/stderr через \texttt{STARTUPINFO.hStdInput/hStdOutput/hStdError}
+    \end{itemize}
+    
+    \item \texttt{GetStdHandle()} --- получение стандартного дескриптора
+    \begin{itemize}
+        \item Параметры: тип дескриптора (STD\_INPUT\_HANDLE, STD\_OUTPUT\_HANDLE, STD\_ERROR\_HANDLE)
+        \item Используется в child для получения перенаправленных дескрипторов
+    \end{itemize}
+    
+    \item \texttt{ReadFile()} --- чтение данных из дескриптора
+    \begin{itemize}
+        \item Параметры: дескриптор, буфер, размер, указатель на количество прочитанных байт
+        \item Используется для чтения из pipe
+    \end{itemize}
+    
+    \item \texttt{WriteFile()} --- запись данных в дескриптор
+    \begin{itemize}
+        \item Параметры: дескриптор, буфер, размер, указатель на количество записанных байт
+        \item Используется для записи в pipe
+    \end{itemize}
+    
+    \item \texttt{WaitForSingleObject()} --- ожидание завершения процесса
+    \begin{itemize}
+        \item Параметры: дескриптор процесса, timeout (INFINITE для бесконечного ожидания)
+        \item Блокирует выполнение до завершения дочернего процесса
+    \end{itemize}
+    
+    \item \texttt{GetExitCodeProcess()} --- получение кода возврата процесса
+    \begin{itemize}
+        \item Параметры: дескриптор процесса, указатель на переменную для кода
+    \end{itemize}
+    
+    \item \texttt{CloseHandle()} --- закрытие дескриптора
+    \begin{itemize}
+        \item Освобождает ресурсы, связанные с дескриптором
+        \item Критически важно для корректного завершения pipe'ов
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Особенности реализации}
+
+\textbf{1. Правильное наследование дескрипторов:}
+
+По умолчанию создаём pipe'ы с \texttt{bInheritHandle = FALSE}, затем явно указываем, какие дескрипторы должны наследоваться через \texttt{SetHandleInformation()}. Это предотвращает утечки ресурсов.
+
+\textbf{2. Перенаправление потоков:}
+
+Child процесс получает перенаправленные stdin/stdout через \texttt{STARTUPINFO}, что позволяет ему работать с pipe'ами как с обычными потоками ввода-вывода.
+
+\textbf{3. Закрытие ненужных концов pipe'ов:}
+
+Parent закрывает те концы pipe'ов, которые использует child, чтобы избежать deadlock'ов. Child автоматически получает только нужные ему дескрипторы.
+
+\textbf{4. Обработка ошибок:}
+
+Все системные вызовы проверяются через макрос \texttt{ASSERT\_MSG()}, который выводит подробную информацию об ошибке (файл, строка, условие) и завершает программу через \texttt{exit(1)}.
+
+\textbf{5. Логирование:}
+
+Используются макросы \texttt{LogMsg()} и \texttt{LogErr()} с временными метками в формате HH-MM-SS, что позволяет отслеживать последовательность событий.

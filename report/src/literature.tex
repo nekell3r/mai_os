@@ -1,19 +1,61 @@
 \section{Исходная программа}
 
-Сюда вставляем ваш код (весь)
+Ниже представлен полный исходный код программы.
 
-\begin{center}
-\lstinputlisting[language=C++,caption=*Сюда описание*,captionpos=b]{inc/example.cpp}
-\end{center}
+\subsection{Вспомогательные модули (common)}
 
-А таким образом можно вставлять "сырой" код в виде текста
-\begin{lstlisting}[language=C++]
-#include <iostream>
+\subsubsection{comm.h}
 
-int main() {
-    std::cout << "Hello, world!" << std::endl;
-    return 0;
-}
-\end{lstlisting}
+\lstinputlisting[language=C++,caption=comm.h,basicstyle=\tiny\ttfamily]{inc/comm.h}
 
-Также сюда необходимо будет вставить strace (утилита, которая будет выводить системные вызовы вашей программы)
+\subsubsection{defines.h}
+
+\lstinputlisting[language=C++,caption=defines.h,basicstyle=\tiny\ttfamily]{inc/defines.h}
+
+\subsubsection{errors.h}
+
+\lstinputlisting[language=C++,caption=errors.h,basicstyle=\tiny\ttfamily]{inc/errors.h}
+
+\subsubsection{errors.hpp}
+
+\lstinputlisting[language=C++,caption=errors.hpp,basicstyle=\tiny\ttfamily]{inc/errors.hpp}
+
+\subsubsection{errors.cpp}
+
+\lstinputlisting[language=C++,caption=errors.cpp,basicstyle=\tiny\ttfamily]{inc/errors.cpp}
+
+\subsection{Основные модули}
+
+\subsubsection{parent.cpp}
+
+\lstinputlisting[language=C++,caption=parent.cpp,basicstyle=\small\ttfamily]{inc/parent.cpp}
+
+\subsubsection{child.cpp}
+
+\lstinputlisting[language=C++,caption=child.cpp,basicstyle=\small\ttfamily]{inc/child.cpp}
+
+\subsection{Тестовый запуск программы}
+
+\textbf{Команда запуска:}
+
+\begin{verbatim}
+D:\programming_projects\mai_os\lab1\build\src> echo test_numbers.txt | .\parent.exe
+\end{verbatim}
+
+\textbf{Реальный вывод программы:}
+
+\begin{verbatim}
+Введите имя файла: 19-18-31MSG parent Читаю файл 'test_numbers.txt'
+19-18-31MSG parent Отправляю число 15 дочернему процессу
+19-18-31MSG parent Получено составное число 15 от дочернего процесса
+19-18-31MSG parent Отправляю число 20 дочернему процессу
+19-18-31MSG parent Получено составное число 20 от дочернего процесса
+19-18-31MSG parent Отправляю число 8 дочернему процессу
+19-18-31MSG parent Получено составное число 8 от дочернего процесса
+19-18-31MSG parent Отправляю число 12 дочернему процессу
+19-18-31MSG parent Получено составное число 12 от дочернего процесса
+19-18-31MSG parent Отправляю число 7 дочернему процессу
+19-18-31MSG parent Получен сигнал завершения от дочернего процесса
+19-18-31MSG parent Дочерний процесс завершился с кодом 0
+19-18-31MSG parent Завершение работы
+\end{verbatim}
