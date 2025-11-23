@@ -1,0 +1,8 @@
+D:/programming_projects/mai_os/lab2/build/CMakeFiles/edit_cache.dir
+D:/programming_projects/mai_os/lab2/build/CMakeFiles/rebuild_cache.dir
+D:/programming_projects/mai_os/lab2/build/common/CMakeFiles/common.dir
+D:/programming_projects/mai_os/lab2/build/common/CMakeFiles/edit_cache.dir
+D:/programming_projects/mai_os/lab2/build/common/CMakeFiles/rebuild_cache.dir
+D:/programming_projects/mai_os/lab2/build/src/CMakeFiles/median_filter.dir
+D:/programming_projects/mai_os/lab2/build/src/CMakeFiles/edit_cache.dir
+D:/programming_projects/mai_os/lab2/build/src/CMakeFiles/rebuild_cache.dir

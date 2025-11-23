@@ -122,10 +122,10 @@ int main(int argc, char* argv[]) {
         // Вывод статистики
         auto stats = filter.getStats();
         std::cout << "\n==============================================\n";
-        std::cout << "Статистика выполнения:\n";
-        std::cout << "  Общее время: " << stats.total_time_ms << " мс\n";
-        std::cout << "  Среднее время итерации: " << stats.avg_iteration_time_ms << " мс\n";
-        std::cout << "  Использовано потоков: " << stats.threads_used << "\n";
+        std::cout << "Execution Statistics:\n";
+        std::cout << "  Total time: " << stats.total_time_ms << " ms\n";
+        std::cout << "  Average iteration time: " << stats.avg_iteration_time_ms << " ms\n";
+        std::cout << "  Threads used: " << stats.threads_used << "\n";
         std::cout << "==============================================\n\n";
         
         // Вывод результата (если запрошено и матрица небольшая)

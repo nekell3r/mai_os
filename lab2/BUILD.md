@@ -3,57 +3,86 @@
 ## Требования
 
 - CMake версии 3.10 или выше
+- Ninja build system
 - C++ компилятор с поддержкой C++17:
   - Windows: MSVC (Visual Studio 2017 или новее) или MinGW
-  - Linux/Unix: GCC 7+ или Clang 5+
 
-## Сборка на Windows
+## Сборка на Windows с Ninja
 
-### Вариант 1: Visual Studio
+### Основной способ (Ninja)
 
 ```powershell
 # Создать директорию для сборки
 mkdir build
 cd build
 
-# Сгенерировать проект Visual Studio
-cmake ..
+# Сгенерировать файлы сборки Ninja
+cmake -G Ninja ..
 
 # Собрать проект
-cmake --build . --config Release
+ninja
+
+# Или альтернативно через cmake
+# cmake --build .
 
 # Запустить
-cd src\Release
+cd src
 .\median_filter.exe -h
 ```
 
-### Вариант 2: MinGW
+### Сборка Release версии
 
 ```powershell
-# Создать директорию для сборки
 mkdir build
 cd build
 
-# Сгенерировать Makefile
-cmake -G "MinGW Makefiles" ..
+# Сгенерировать с оптимизациями
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 
 # Собрать
-mingw32-make
+ninja
 
 # Запустить
 cd src
 .\median_filter.exe -h
 ```
 
-### Вариант 3: NMake (из Visual Studio Command Prompt)
+### Сборка Debug версии
 
-```cmd
+```powershell
 mkdir build
 cd build
-cmake -G "NMake Makefiles" ..
-nmake
+
+# Сгенерировать с отладочной информацией
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug ..
+
+# Собрать
+ninja
+
+# Запустить
 cd src
-median_filter.exe -h
+.\median_filter.exe -h
+```
+
+## Установка Ninja (если не установлен)
+
+### Через Chocolatey
+```powershell
+choco install ninja
+```
+
+### Через Scoop
+```powershell
+scoop install ninja
+```
+
+### Вручную
+1. Скачайте с https://github.com/ninja-build/ninja/releases
+2. Распакуйте `ninja.exe` в директорию в PATH
+
+### Проверка установки
+```powershell
+ninja --version
 ```
 
 ## Примечание
@@ -65,7 +94,7 @@ median_filter.exe -h
 После успешной сборки выполните тестовый запуск:
 
 ```powershell
-# Из директории build\src\Release или build\src
+# Из директории build\src (для Ninja)
 .\median_filter.exe -f ..\..\test_matrix.txt -w 3 -k 1 -t 2 -p
 ```
 
@@ -89,10 +118,9 @@ median_filter.exe -h
 ### Автоматическое тестирование
 
 ```powershell
-# Скопируйте скрипт в директорию build/
+# Из директории build/
+# Скрипт автоматически найдет исполняемый файл
 copy ..\test_performance.ps1 .
-
-# Запустите
 .\test_performance.ps1
 ```
 
@@ -111,41 +139,63 @@ copy ..\test_performance.ps1 .
 
 ## Возможные проблемы
 
-### Windows: "Cannot open file median_filter.exe"
+### "ninja: command not found" или "'ninja' is not recognized"
+
+Установите Ninja (см. раздел "Установка Ninja" выше).
+
+### "Cannot open file median_filter.exe"
 
 Убедитесь, что вы находитесь в правильной директории:
-- Для Visual Studio: `build\src\Release\`
-- Для MinGW: `build\src\`
+- Для Ninja: `build\src\`
 
 ### "CMake не найден"
 
 Установите CMake с https://cmake.org/download/
 
-## Отладочная сборка
+### Ошибки компиляции MSVC
 
-Для отладки используйте Debug конфигурацию:
+Убедитесь, что вы запускаете команды из **Developer Command Prompt for VS** или **Developer PowerShell for VS**, где настроены переменные окружения для MSVC компилятора.
+
+## Пересборка
+
+Для пересборки проекта после изменений:
 
 ```powershell
-# Visual Studio
-cmake --build . --config Debug
+# Из директории build/
+ninja
 
-# MinGW
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-mingw32-make
+# Или для очистки и полной пересборки
+ninja clean
+ninja
 ```
 
-## Очистка
+## Полная очистка и пересборка
 
 Чтобы пересобрать проект с нуля:
 
 ```powershell
-# Удалить директорию сборки
+# Из директории проекта
 cd ..
-rmdir /s build
+rmdir /s /q build
 
 # Создать заново
 mkdir build
 cd build
-cmake ..
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+ninja
+```
+
+## Быстрая сборка
+
+```powershell
+# Создать алиас для быстрой сборки (опционально)
+function Build-Lab2 {
+    Push-Location $PSScriptRoot
+    if (!(Test-Path "build")) { mkdir build }
+    cd build
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+    ninja
+    Pop-Location
+}
 ```
 

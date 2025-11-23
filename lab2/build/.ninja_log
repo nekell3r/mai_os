@@ -1,0 +1,8 @@
+# ninja log v6
+6	2011	7856129031205340	common/CMakeFiles/common.dir/errors.cpp.obj	72a36b537556f1fe
+14	2306	7856129031285396	src/CMakeFiles/median_filter.dir/main.cpp.obj	b8d3900d61da1d11
+2016	2402	7856129051303589	common/libcommon.a	339559ea3d32835f
+18	2810	7856129031325435	src/CMakeFiles/median_filter.dir/median_filter.cpp.obj	f77c337d78a4297a
+2811	2973	7856129059248293	src/median_filter.exe	4d2bf58f12f8cbfa
+21	1768	7856131760929884	src/CMakeFiles/median_filter.dir/main.cpp.obj	b8d3900d61da1d11
+1769	1915	7856131778403777	src/median_filter.exe	4d2bf58f12f8cbfa
