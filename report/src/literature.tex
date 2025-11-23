@@ -1,19 +1,29 @@
 \section{Исходная программа}
 
-Сюда вставляем ваш код (весь)
+\subsection{Вспомогательные модули (common)}
 
-\begin{center}
-\lstinputlisting[language=C++,caption=*Сюда описание*,captionpos=b]{inc/example.cpp}
-\end{center}
+\subsubsection{comm.h}
 
-А таким образом можно вставлять "сырой" код в виде текста
-\begin{lstlisting}[language=C++]
-#include <iostream>
+\lstinputlisting[language=C++,caption=comm.h,basicstyle=\tiny\ttfamily]{inc/comm.h}
 
-int main() {
-    std::cout << "Hello, world!" << std::endl;
-    return 0;
-}
-\end{lstlisting}
+\subsubsection{defines.h}
 
-Также сюда необходимо будет вставить strace (утилита, которая будет выводить системные вызовы вашей программы)
+\lstinputlisting[language=C++,caption=defines.h,basicstyle=\tiny\ttfamily]{inc/defines.h}
+
+\subsubsection{errors.h}
+
+\lstinputlisting[language=C++,caption=errors.h,basicstyle=\tiny\ttfamily]{inc/errors.h}
+
+\subsection{Основные модули}
+
+\subsubsection{median\_filter.h}
+
+\lstinputlisting[language=C++,caption=median\_filter.h,basicstyle=\small\ttfamily]{inc/median_filter.h}
+
+\subsubsection{median\_filter.cpp}
+
+\lstinputlisting[language=C++,caption=median\_filter.cpp,basicstyle=\small\ttfamily]{inc/median_filter.cpp}
+
+\subsubsection{main.cpp}
+
+\lstinputlisting[language=C++,caption=main.cpp,basicstyle=\small\ttfamily]{inc/main.cpp}
