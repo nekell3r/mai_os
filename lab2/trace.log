@@ -1,0 +1,179 @@
+Opened log file 'D:\programming_projects\mai_os\lab2\build\src\trace.log'
+0:000> bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+0:000> bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+breakpoint 0 redefined
+0:000> bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+breakpoint 0 redefined
+0:000> bu ntdll!NtWaitForMultipleObjects ".echo === NtWaitForMultipleObjects ===; g"
+bu ntdll!NtWaitForMultipleObjects ".echo === NtWaitForMultipleObjects ===; g"
+0:000> bu ntdll!NtClose ".echo NtClose; g"
+bu ntdll!NtClose ".echo NtClose; g"
+0:000> bu ntdll!NtWriteFile ".echo NtWriteFile; g"
+bu ntdll!NtWriteFile ".echo NtWriteFile; g"
+0:000> g
+g
+NtClose
+ModLoad: 00007ffa`44960000 00007ffa`44a14000   C:\WINDOWS\System32\advapi32.dll
+ModLoad: 00007ffa`45340000 00007ffa`453e9000   C:\WINDOWS\System32\msvcrt.dll
+NtClose
+ModLoad: 00007ffa`44b30000 00007ffa`44bd6000   C:\WINDOWS\System32\sechost.dll
+NtClose
+ModLoad: 00007ffa`44c60000 00007ffa`44d78000   C:\WINDOWS\System32\RPCRT4.dll
+NtClose
+NtClose
+ModLoad: 00007ffa`42ba0000 00007ffa`42bac000   C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL
+NtClose
+NtClose
+ModLoad: 00007ffa`43c90000 00007ffa`43d35000   C:\WINDOWS\System32\bcryptPrimitives.dll
+NtClose
+NtClose
+NtClose
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+=== NtCreateThreadEx (CreateThread) ===
+=== NtCreateThreadEx (CreateThread) ===
+=== NtCreateThreadEx (CreateThread) ===
+=== NtCreateThreadEx (CreateThread) ===
+=== NtWaitForMultipleObjects ===
+NtClose
+NtClose
+NtClose
+NtClose
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+NtWriteFile
+ModLoad: 00007ffa`42350000 00007ffa`4236b000   C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+NtClose
+ntdll!NtTerminateProcess+0x14:
+00007ffa`46482244 c3              ret
+0:000> .logclose
+.logclose
+Closing open log file D:\programming_projects\mai_os\lab2\build\src\trace.log

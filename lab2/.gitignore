@@ -45,7 +45,6 @@ rules.ninja
 # Output files
 output_*.txt
 result_*.txt
-*.log
 
 # Performance test results
 performance_results.csv
