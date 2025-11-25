@@ -44,7 +44,6 @@ rules.ninja
 
 # Output files
 output.txt
-*.log
 
 # Test generated files
 test_output_*.txt
