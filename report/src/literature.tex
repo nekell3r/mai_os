@@ -67,84 +67,41 @@ Matrix saved to output_matrix.txt
 
 \subsection{Трассировка системных вызовов (WinDbg)}
 
-Для демонстрации использования системных вызовов Windows API программа была запущена под отладчиком WinDbg с установленными breakpoints на ключевые функции.
+Для демонстрации использования системных вызовов Windows API программа была запущена под отладчиком WinDbg с установленными breakpoints на ключевые функции уровня NTDLL (Native API).
 
 \subsubsection{Команды WinDbg}
 
 \begin{verbatim}
 windbgx.exe median_filter.exe -g 100 100 -w 3 -k 1 -t 4
 .logopen D:\programming_projects\mai_os\lab2\build\src\trace.log
-bu ntdll!NtCreateThreadEx
-bu KERNELBASE!CreateThread
-bu KERNELBASE!WaitForMultipleObjects
-bu KERNELBASE!CloseHandle
+bu ntdll!NtCreateThreadEx ".echo === NtCreateThreadEx (CreateThread) ===; g"
+bu ntdll!NtWaitForMultipleObjects ".echo === NtWaitForMultipleObjects ===; g"
+bu ntdll!NtClose ".echo NtClose; g"
+bu ntdll!NtWriteFile ".echo NtWriteFile; g"
 g
 \end{verbatim}
 
-\subsubsection{Результаты трассировки (фрагменты)}
+\subsubsection{Результаты трассировки}
 
-\textbf{Создание 4 потоков:}
-
-\begin{verbatim}
-Breakpoint 33 hit
-KERNEL32!CreateThreadStub:
-00007ffa`448c3100 4c8bdc          mov     r11,rsp
-
-Breakpoint 0 hit
-ntdll!NtCreateThreadEx:
-00007ffa`464835c0 4c8bd1          mov     r10,rcx
-
-Breakpoint 33 hit
-KERNEL32!CreateThreadStub:
-00007ffa`448c3100 4c8bdc          mov     r11,rsp
-
-Breakpoint 0 hit
-ntdll!NtCreateThreadEx:
-00007ffa`464835c0 4c8bd1          mov     r10,rcx
-
-Breakpoint 33 hit
-KERNEL32!CreateThreadStub:
-00007ffa`448c3100 4c8bdc          mov     r11,rsp
-
-Breakpoint 0 hit
-ntdll!NtCreateThreadEx:
-00007ffa`464835c0 4c8bd1          mov     r10,rcx
-
-Breakpoint 33 hit
-KERNEL32!CreateThreadStub:
-00007ffa`448c3100 4c8bdc          mov     r11,rsp
-
-Breakpoint 0 hit
-ntdll!NtCreateThreadEx:
-00007ffa`464835c0 4c8bd1          mov     r10,rcx
-\end{verbatim}
-
-\textbf{Ожидание завершения всех потоков:}
+Ниже представлен фрагмент лога с ключевыми системными вызовами (NtClose и NtWriteFile от инициализации опущены для краткости):
 
 \begin{verbatim}
-Breakpoint 35 hit
-KERNELBASE!WaitForMultipleObjects:
-00007ffa`434ae680 4883ec38        sub     rsp,38h
-\end{verbatim}
+... (загрузка модулей) ...
 
-\textbf{Закрытие дескрипторов потоков (4 раза):}
+=== NtCreateThreadEx (CreateThread) ===
+=== NtCreateThreadEx (CreateThread) ===
+=== NtCreateThreadEx (CreateThread) ===
+=== NtCreateThreadEx (CreateThread) ===
+=== NtWaitForMultipleObjects ===
+NtClose
+NtClose
+NtClose
+NtClose
 
-\begin{verbatim}
-Breakpoint 36 hit
-KERNELBASE!CloseHandle:
-00007ffa`434b26f0 4053            push    rbx
+... (вывод результатов через NtWriteFile) ...
 
-Breakpoint 36 hit
-KERNELBASE!CloseHandle:
-00007ffa`434b26f0 4053            push    rbx
-
-Breakpoint 36 hit
-KERNELBASE!CloseHandle:
-00007ffa`434b26f0 4053            push    rbx
-
-Breakpoint 36 hit
-KERNELBASE!CloseHandle:
-00007ffa`434b26f0 4053            push    rbx
+ntdll!NtTerminateProcess+0x14:
+00007ffa`46482244 c3              ret
 \end{verbatim}
 
 \subsubsection{Анализ трассировки}
@@ -152,13 +109,16 @@ KERNELBASE!CloseHandle:
 Трассировка подтверждает следующую последовательность системных вызовов:
 
 \begin{enumerate}
-    \item \textbf{CreateThread} (через KERNEL32!CreateThreadStub) вызывается \textbf{4 раза} для создания рабочих потоков
-    \item \textbf{NtCreateThreadEx} (низкоуровневый системный вызов в ядро) вызывается \textbf{4 раза} — по разу для каждого потока
-    \item \textbf{WaitForMultipleObjects} вызывается \textbf{1 раз} для ожидания завершения всех 4 потоков
-    \item \textbf{CloseHandle} вызывается \textbf{4 раза} для освобождения дескрипторов потоков
+    \item \textbf{NtCreateThreadEx} вызывается \textbf{4 раза подряд} (строки 113-116 полного лога) — это низкоуровневый системный вызов ядра Windows для создания потоков. Каждый вызов соответствует функции \texttt{CreateThread} из KERNEL32 API.
+    
+    \item \textbf{NtWaitForMultipleObjects} вызывается \textbf{1 раз} (строка 117) — главный поток блокируется до завершения всех 4 рабочих потоков. Это обертка для \texttt{WaitForMultipleObjects}.
+    
+    \item \textbf{NtClose} вызывается \textbf{4 раза подряд} (строки 118-121) сразу после завершения ожидания — освобождаются дескрипторы завершившихся потоков. Соответствует \texttt{CloseHandle}.
+    
+    \item \textbf{NtWriteFile} вызывается многократно для вывода статистики и логов в консоль.
 \end{enumerate}
 
-Это полностью соответствует архитектуре программы и варианту задания (медианный фильтр с многопоточной обработкой).
+Последовательность полностью соответствует архитектуре программы: создание $\rightarrow$ ожидание $\rightarrow$ освобождение ресурсов.
 
 \subsection{Системные вызовы Windows API}
 
