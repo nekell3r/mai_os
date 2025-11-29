@@ -1,63 +1,70 @@
-# Лабораторная работа №3 - Вариант 10
+# Лабораторная работа №3 - Межпроцессное взаимодействие (File Mapping)
 
-## Описание задания
+**Вариант 10:** Проверка чисел на простоту через shared memory.
+
+---
+
+## Сборка
+
+```powershell
+# Автоматически
+.\rebuild.ps1
+
+# Или вручную
+mkdir build; cd build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+ninja
+```
+
+---
+
+## Запуск
+
+```powershell
+cd build\src
+copy ..\..\test_numbers.txt .
+.\parent.exe
+```
+
+Программа запросит имя файла. Введите `test_numbers.txt` или путь к вашему файлу.
+
+### Автоматический ввод
+
+```powershell
+echo test_numbers.txt | .\parent.exe
+```
+
+---
+
+## Описание
 
 Программа реализует межпроцессное взаимодействие между родительским и дочерним процессами через **file mapping (memory-mapped files)** на Windows.
 
 ### Алгоритм работы:
 
-1. **Родительский процесс:**
-   - Запрашивает у пользователя имя файла
+1. **Родительский процесс (parent.exe):**
+   - Запрашивает имя файла с числами
    - Создаёт shared memory через file mapping
    - Создаёт события (Events) для синхронизации
-   - Запускает дочерний процесс
+   - Запускает дочерний процесс (child.exe)
    - Читает числа из файла и отправляет их через shared memory
    - Получает ответы от дочернего процесса
 
-2. **Дочерний процесс:**
+2. **Дочерний процесс (child.exe):**
    - Открывает существующий file mapping
    - Открывает события для синхронизации
    - Читает числа из shared memory
    - Проверяет каждое число:
-     - Если число **отрицательное** → завершает работу (и родитель тоже завершается)
-     - Если число **простое** → завершает работу (и родитель тоже завершается)
-     - Если число **составное** → отправляет его обратно родителю через shared memory
+     - Если число **отрицательное** → завершает работу
+     - Если число **простое** → завершает работу
+     - Если число **составное** → отправляет его обратно родителю
 
-## Структура проекта
+---
 
-```
-lab3/
-├── common/                 # Общие утилиты
-│   ├── CMakeLists.txt
-│   ├── defines.h           # Платформенные макросы
-│   ├── comm.h              # Логирование (LogMsg, LogErr)
-│   ├── errors.h            # Обработка ошибок
-│   ├── errors.hpp          # Шаблоны для ошибок
-│   └── errors.cpp          # Реализация DebugBreak
-├── src/                    # Исходники программ
-│   ├── CMakeLists.txt
-│   ├── parent.cpp          # Родительский процесс
-│   └── child.cpp           # Дочерний процесс
-├── CMakeLists.txt          # Корневой файл сборки
-├── test_numbers.txt        # Тестовый файл с числами
-├── BUILD.md                # Инструкции по сборке
-└── README.md               # Этот файл
-```
+## Примеры
 
-## Требования
+### Тестовый файл `test_numbers.txt`:
 
-- **Windows 10/11**
-- **CMake 3.10+**
-- **Visual Studio 2019+** (или MinGW)
-- **C++17**
-
-## Компиляция и запуск
-
-См. [BUILD.md](BUILD.md)
-
-## Пример использования
-
-### Тестовый файл `test_numbers.txt` содержит:
 ```
 15
 20
@@ -67,297 +74,148 @@ lab3/
 ```
 
 ### Ожидаемый вывод:
+
 ```
-Введите имя файла: test_numbers.txt
-16-00-21MSG parent Читаю файл 'test_numbers.txt'
-16-00-21MSG parent Shared memory инициализирована
-16-00-21MSG parent События для синхронизации созданы
-16-00-21MSG parent Дочерний процесс запущен
-16-00-21MSG parent Отправляю число 15 дочернему процессу
-16-00-21MSG parent Получено составное число 15 от дочернего процесса
-16-00-21MSG parent Отправляю число 20 дочернему процессу
-16-00-21MSG parent Получено составное число 20 от дочернего процесса
-16-00-21MSG parent Отправляю число 8 дочернему процессу
-16-00-21MSG parent Получено составное число 8 от дочернего процесса
-16-00-21MSG parent Отправляю число 12 дочернему процессу
-16-00-21MSG parent Получено составное число 12 от дочернего процесса
-16-00-21MSG parent Отправляю число 7 дочернему процессу
-16-00-21MSG parent Получен сигнал завершения от дочернего процесса
-16-00-21MSG parent Дочерний процесс завершился с кодом 0
-16-00-21MSG parent Завершение работы
+Enter filename: test_numbers.txt
+16-00-21MSG parent Reading file 'test_numbers.txt'
+16-00-21MSG parent Shared memory initialized
+16-00-21MSG parent Synchronization events created
+16-00-21MSG parent Child process started
+16-00-21MSG parent Sending number 15 to child process
+16-00-21MSG parent Received composite number 15 from child process
+16-00-21MSG parent Sending number 20 to child process
+16-00-21MSG parent Received composite number 20 from child process
+16-00-21MSG parent Sending number 8 to child process
+16-00-21MSG parent Received composite number 8 from child process
+16-00-21MSG parent Sending number 12 to child process
+16-00-21MSG parent Received composite number 12 from child process
+16-00-21MSG parent Sending number 7 to child process
+16-00-21MSG parent Received termination signal from child process
+16-00-21MSG parent Child process exited with code 0
+16-00-21MSG parent Shutting down
 ```
+
+### Создание своих тестов:
+
+```powershell
+# Тест с простым числом
+echo 4 > test1.txt
+echo 9 >> test1.txt
+echo 11 >> test1.txt
+echo test1.txt | .\parent.exe
+
+# Тест с отрицательным числом
+echo 10 > test2.txt
+echo -5 >> test2.txt
+echo test2.txt | .\parent.exe
+
+# Тест только с составными числами
+echo 4 > test3.txt
+echo 6 >> test3.txt
+echo 8 >> test3.txt
+echo 9 >> test3.txt
+echo 10 >> test3.txt
+echo test3.txt | .\parent.exe
+```
+
+---
+
+## Трассировка (WinDbg)
+
+```powershell
+windbg .\build\src\parent.exe
+```
+
+В WinDbg:
+
+```
+.logopen D:\programming_projects\mai_os\lab3\build\src\trace.log
+
+# File Mapping
+bp ntdll!NtCreateSection ".echo === [1] NtCreateSection ===; g"
+bp ntdll!NtMapViewOfSection ".echo === [2] NtMapViewOfSection ===; g"
+bp ntdll!NtUnmapViewOfSection ".echo === [UNMAP] NtUnmapViewOfSection ===; g"
+
+# Events
+bp ntdll!NtCreateEvent ".echo === [3] NtCreateEvent ===; g"
+bp ntdll!NtOpenEvent ".echo === [CHILD] NtOpenEvent ===; g"
+bp ntdll!NtSetEvent ".echo === [SIGNAL] NtSetEvent ===; g"
+bp ntdll!NtWaitForSingleObject ".echo === [WAIT] NtWaitForSingleObject ===; g"
+
+# Processes
+bp ntdll!NtCreateUserProcess ".echo === [PROCESS] NtCreateUserProcess ===; g"
+
+# I/O
+bp ntdll!NtReadFile ".echo === [READ] NtReadFile ===; g"
+bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile ===; g"
+
+g
+.logclose
+```
+
+---
 
 ## Windows API
 
-Использованные Windows API функции:
-
 ### File Mapping:
-- `CreateFileMappingA()` — создание объекта file mapping в памяти
-- `OpenFileMappingA()` — открытие существующего объекта file mapping
-- `MapViewOfFile()` — отображение file mapping в адресное пространство процесса
+- `CreateFileMappingA()` — создание объекта file mapping
+- `OpenFileMappingA()` — открытие существующего file mapping
+- `MapViewOfFile()` — отображение в адресное пространство
 - `UnmapViewOfFile()` — отмена отображения
 
 ### Синхронизация:
 - `CreateEventA()` — создание именованного события
-- `OpenEventA()` — открытие существующего именованного события
-- `SetEvent()` — установка события в signaled состояние
+- `OpenEventA()` — открытие существующего события
+- `SetEvent()` — установка события в signaled
 - `WaitForSingleObject()` — ожидание события
 
 ### Процессы:
 - `CreateProcess()` — создание дочернего процесса
-- `WaitForSingleObject()` — ожидание завершения дочернего процесса
-- `GetExitCodeProcess()` — получение кода возврата процесса
-- `CloseHandle()` — закрытие дескрипторов
+- `WaitForSingleObject()` — ожидание завершения процесса
+- `GetExitCodeProcess()` — получение кода возврата
 
-## Особенности реализации
+---
 
-### 1. File Mapping (Memory-Mapped Files)
-
-Вместо pipe'ов используется **shared memory** через механизм file mapping:
-
-```cpp
-// Родитель создаёт file mapping
-HANDLE hMapFile = CreateFileMappingA(
-    INVALID_HANDLE_VALUE,    // Используем системную память
-    nullptr,                 
-    PAGE_READWRITE,          
-    0,                       
-    sizeof(SharedData),      
-    "Local\\Lab3SharedMemory"
-);
-
-// Ребёнок открывает существующий file mapping
-HANDLE hMapFile = OpenFileMappingA(
-    FILE_MAP_ALL_ACCESS,
-    FALSE,
-    "Local\\Lab3SharedMemory"
-);
-```
-
-### 2. Структура Shared Memory
-
-```cpp
-struct SharedData {
-    int number;              // Число для проверки
-    int response;            // Ответ от дочернего процесса
-    bool has_request;        // Есть ли новый запрос от родителя
-    bool has_response;       // Есть ли новый ответ от ребёнка
-    bool should_terminate;   // Флаг завершения работы
-};
-```
-
-### 3. Синхронизация через Events
-
-Для координации доступа к shared memory используются два события:
-
-- **EventRequest** — родитель сигнализирует ребёнку о новом запросе
-- **EventResponse** — ребёнок сигнализирует родителю о готовности ответа
-
-```cpp
-// Родитель отправляет запрос
-pSharedData->number = 42;
-pSharedData->has_request = true;
-SetEvent(hEventRequest);  // Сигнализируем ребёнку
-
-// Ребёнок ожидает запроса
-WaitForSingleObject(hEventRequest, INFINITE);
-// Обрабатывает number
-pSharedData->response = result;
-pSharedData->has_response = true;
-SetEvent(hEventResponse);  // Сигнализируем родителю
-```
-
-### 4. Преимущества File Mapping перед Pipes
-
-| Аспект | Pipes (Lab1) | File Mapping (Lab3) |
-|--------|--------------|---------------------|
-| **Механизм** | Потоковая передача данных | Разделяемая память |
-| **Скорость** | Копирование данных | Прямой доступ к памяти |
-| **Сложность** | Проще в использовании | Требует синхронизации |
-| **Объём данных** | Последовательный | Произвольный доступ |
-| **Типичное использование** | Потоки данных | Разделяемые структуры |
-
-### 5. Именование объектов
-
-Используется префикс `Local\\` для именования объектов:
-- `Local\\Lab3SharedMemory` — file mapping
-- `Local\\Lab3EventRequest` — событие запроса
-- `Local\\Lab3EventResponse` — событие ответа
-
-Префикс `Local\\` гарантирует, что объекты создаются в локальном пространстве имён сеанса.
-
-### 6. Обработка ошибок
-
-- Проверка всех системных вызовов через `ASSERT_MSG()`
-- Правильное освобождение ресурсов в обоих процессах
-- Таймаут для WaitForSingleObject (защита от зависания)
-
-## Диаграмма взаимодействия
+## Структура проекта
 
 ```
-┌──────────┐                              ┌──────────┐
-│   User   │                              │   File   │
-└────┬─────┘                              └────┬─────┘
-     │ filename                                │
-     │                                         │
-     ▼                                         │
-┌─────────────────┐                           │
-│     Parent      │◄──────────────────────────┘
-│   (parent.exe)  │         read numbers
-└────────┬────────┘
-         │
-         │ CreateProcess()
-         │ + CreateFileMapping()
-         │ + CreateEvent()
-         │
-         ├────────────────────────────────────┐
-         │                                    │
-         ▼                                    ▼
-┌─────────────────────────────┐    ┌───────────────────┐
-│      Shared Memory          │    │      Events       │
-│   (File Mapping)            │    │  - EventRequest   │
-│                             │    │  - EventResponse  │
-│  struct SharedData {        │    └────────┬──────────┘
-│    int number;              │             │
-│    int response;            │             │
-│    bool has_request;        │             │
-│    bool has_response;       │             │
-│    bool should_terminate;   │             │
-│  }                          │             │
-└──────────┬──────────────────┘             │
-           │                                │
-           │     OpenFileMapping()          │
-           │     OpenEvent()                │
-           │                                │
-           ▼                                ▼
-    ┌─────────────────┐
-    │      Child      │
-    │   (child.exe)   │
-    │                 │
-    │  - check prime  │
-    │  - check < 0    │
-    └─────────────────┘
+lab3/
+├── common/                 # Общие утилиты
+│   ├── comm.h              # Логирование
+│   ├── defines.h           # Платформенные макросы
+│   └── errors.h/cpp/hpp    # Обработка ошибок
+├── src/                    # Исходники
+│   ├── parent.cpp          # Родительский процесс
+│   └── child.cpp           # Дочерний процесс
+├── test_numbers.txt        # Тестовый файл
+├── rebuild.ps1             # Скрипт пересборки
+└── README.md               # Этот файл
 ```
 
-## Последовательность взаимодействия
+---
 
-```
-Parent                          Child
-  │
-  ├─ CreateFileMapping()
-  ├─ MapViewOfFile()
-  ├─ CreateEvent(Request)
-  ├─ CreateEvent(Response)
-  ├─ CreateProcess() ─────────────→ │
-  │                                  ├─ OpenFileMapping()
-  │                                  ├─ MapViewOfFile()
-  │                                  ├─ OpenEvent(Request)
-  │                                  ├─ OpenEvent(Response)
-  │                                  ├─ WaitForSingleObject(Request)
-  │                                  │   [WAITING...]
-  ├─ Write number to SharedData
-  ├─ SetEvent(Request) ─────────────→ │
-  ├─ WaitForSingleObject(Response)   ├─ Read number
-  │   [WAITING...]                   ├─ Check prime
-  │                                  ├─ Write response to SharedData
-  │                                  ├─ SetEvent(Response)
-  │                                  └─ WaitForSingleObject(Request)
-  │                                      [WAITING...]
-  ├─ Read response ←──────────────────┘
-  ├─ Write next number
-  └─ ...
-```
+## Возможные проблемы
 
-## Возможные проблемы и решения
+### child.exe не найден
 
-### 1. child.exe не найден
-
-**Проблема:** `Не удалось создать дочерний процесс`
+**Проблема:** `Failed to create child process`
 
 **Решение:**
 - Убедитесь, что `child.exe` находится в той же директории, что и `parent.exe`
-- Проверьте, что оба файла скомпилированы в одной конфигурации
+- Проверьте, что оба файла скомпилированы
 
-### 2. Не удалось открыть file mapping
+### Не удалось открыть file mapping
 
 **Проблема:** Child не может открыть shared memory
 
 **Решение:**
 - Убедитесь, что parent процесс запущен первым
 - Проверьте, что имена объектов совпадают в обоих процессах
-- Увеличьте Sleep() в parent после запуска child
 
-### 3. Таймаут ожидания ответа
+### Таймаут ожидания ответа
 
-**Проблема:** `Таймаут ожидания ответа от дочернего процесса`
+**Проблема:** `Timeout waiting for response from child process`
 
 **Решение:**
 - Проверьте, что child процесс корректно сигнализирует через SetEvent()
 - Убедитесь, что флаги has_request/has_response корректно устанавливаются
-- Увеличьте таймаут в WaitForSingleObject()
-
-### 4. Ошибки доступа к памяти
-
-**Проблема:** Access violation при работе с SharedData
-
-**Решение:**
-- Убедитесь, что MapViewOfFile() выполнен успешно в обоих процессах
-- Проверьте, что размер SharedData одинаковый в parent и child
-- Убедитесь, что UnmapViewOfFile() не вызывается преждевременно
-
-## Сравнение с Lab1 и Lab2
-
-| Аспект | Lab1 | Lab2 | Lab3 |
-|--------|------|------|------|
-| **Механизм IPC** | Pipes | Threads | File Mapping + Events |
-| **Процессы** | Parent + Child | Single process | Parent + Child |
-| **Синхронизация** | Pipe blocking | Mutex/Semaphore | Events |
-| **Скорость** | Средняя | Быстрая | Очень быстрая |
-| **Сложность** | Низкая | Средняя | Высокая |
-
-## Дополнительная информация
-
-### File Mapping vs Pipes
-
-**File Mapping** подходит когда:
-- Нужен быстрый доступ к общим данным
-- Данные имеют структуру
-- Процессы работают на одной машине
-
-**Pipes** подходят когда:
-- Нужна потоковая передача данных
-- Большие объёмы данных
-- Простая последовательная обработка
-
-### Named Objects в Windows
-
-Объекты с именами (named objects) в Windows позволяют разным процессам получить доступ к одному и тому же ресурсу:
-- File mappings
-- Events
-- Mutexes
-- Semaphores
-
-Префиксы пространств имён:
-- `Global\\` — доступно всем сеансам
-- `Local\\` — доступно только текущему сеансу
-- Без префикса — `Local\\` по умолчанию
-
-### Auto-reset vs Manual-reset Events
-
-В этой лабораторной используются **auto-reset events**:
-- После WaitForSingleObject() автоматически переходят в non-signaled
-- Не требуют вызова ResetEvent()
-- Подходят для синхронизации "один запрос - один ответ"
-
-**Manual-reset events** требуют явного вызова ResetEvent() и используются когда нужно разбудить несколько потоков одновременно.
-
-## Заключение
-
-Лабораторная работа №3 демонстрирует использование **file mapping** и **events** для межпроцессного взаимодействия на Windows. Это более производительный механизм по сравнению с pipes, но требует явной синхронизации.
-
-**Ключевые навыки:**
-- Работа с shared memory через CreateFileMapping/MapViewOfFile
-- Синхронизация процессов через Events
-- Именованные объекты Windows
-- Обработка race conditions
-

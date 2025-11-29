@@ -1,0 +1,269 @@
+\section{Исходная программа}
+
+\subsection{Вспомогательные модули (common)}
+
+\subsubsection{comm.h}
+
+\lstinputlisting[language=C++,caption=comm.h,basicstyle=\tiny\ttfamily]{inc/comm.h}
+
+\subsubsection{defines.h}
+
+\lstinputlisting[language=C++,caption=defines.h,basicstyle=\tiny\ttfamily]{inc/defines.h}
+
+\subsubsection{errors.h}
+
+\lstinputlisting[language=C++,caption=errors.h,basicstyle=\tiny\ttfamily]{inc/errors.h}
+
+\subsubsection{errors.hpp}
+
+\lstinputlisting[language=C++,caption=errors.hpp,basicstyle=\tiny\ttfamily]{inc/errors.hpp}
+
+\subsubsection{errors.cpp}
+
+\lstinputlisting[language=C++,caption=errors.cpp,basicstyle=\small\ttfamily]{inc/errors.cpp}
+
+\subsection{Основные модули}
+
+\subsubsection{parent.cpp}
+
+\lstinputlisting[language=C++,caption=parent.cpp,basicstyle=\small\ttfamily]{inc/parent.cpp}
+
+\subsubsection{child.cpp}
+
+\lstinputlisting[language=C++,caption=child.cpp,basicstyle=\small\ttfamily]{inc/child.cpp}
+
+\subsection{Тестовый запуск программы}
+
+Программа была запущена для обработки файла с числами \texttt{test\_numbers.txt}.
+
+\textbf{Команда запуска:}
+
+\begin{verbatim}
+D:\programming_projects\mai_os\lab3\build\src> .\parent.exe
+Enter filename: test_numbers.txt
+\end{verbatim}
+
+\textbf{Вывод программы:}
+
+\begin{verbatim}
+Enter filename: test_numbers.txt
+16-00-21MSG parent Reading file 'test_numbers.txt'
+16-00-21MSG parent Shared memory initialized
+16-00-21MSG parent Synchronization events created
+16-00-21MSG parent Child process started
+16-00-21MSG parent Sending number 15 to child process
+16-00-21MSG parent Received composite number 15 from child process
+16-00-21MSG parent Sending number 20 to child process
+16-00-21MSG parent Received composite number 20 from child process
+16-00-21MSG parent Sending number 8 to child process
+16-00-21MSG parent Received composite number 8 from child process
+16-00-21MSG parent Sending number 12 to child process
+16-00-21MSG parent Received composite number 12 from child process
+16-00-21MSG parent Sending number 7 to child process
+16-00-21MSG parent Received termination signal from child process
+16-00-21MSG parent Child process exited with code 0
+16-00-21MSG parent Shutting down
+\end{verbatim}
+
+Программа успешно создала file mapping, два события синхронизации и дочерний процесс. Обработала числа 15, 20, 8, 12 (составные) и завершилась при получении числа 7 (простое).
+
+\subsection{Трассировка системных вызовов (WinDbg)}
+
+Для демонстрации использования системных вызовов Windows API программа была запущена под отладчиком WinDbg с установленными breakpoints на ключевые функции уровня NTDLL (Native API).
+
+\subsubsection{Команды WinDbg}
+
+\begin{verbatim}
+windbg .\build\src\parent.exe
+
+# File Mapping
+bp ntdll!NtCreateSection ".echo === [1] NtCreateSection ===; g"
+bp ntdll!NtMapViewOfSection ".echo === [2] NtMapViewOfSection ===; g"
+bp ntdll!NtUnmapViewOfSection ".echo === [UNMAP] NtUnmapViewOfSection ===; g"
+
+# Events
+bp ntdll!NtCreateEvent ".echo === [3] NtCreateEvent ===; g"
+bp ntdll!NtOpenEvent ".echo === [CHILD] NtOpenEvent ===; g"
+bp ntdll!NtSetEvent ".echo === [SIGNAL] NtSetEvent ===; g"
+
+# Processes
+bp ntdll!NtCreateUserProcess ".echo === [PROCESS] NtCreateUserProcess ===; g"
+bp ntdll!NtWaitForSingleObject ".echo === [WAIT] NtWaitForSingleObject ===; g"
+
+# I/O
+bp ntdll!NtReadFile ".echo === [READ] NtReadFile ===; g"
+bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile ===; g"
+
+# Memory
+bp ntdll!NtOpenSection ".echo === [CHILD] NtOpenSection ===; g"
+
+# Cleanup
+bp ntdll!NtClose ".echo === [CLOSE] NtClose ===; g"
+
+.logopen trace_lab3_full.log
+g
+\end{verbatim}
+
+\subsubsection{Результаты трассировки}
+
+Ниже представлен фрагмент лога с ключевыми системными вызовами:
+
+\begin{verbatim}
+... (initialization) ...
+
+=== [1] NtCreateSection (CreateFileMapping) ===
+=== [2] NtMapViewOfSection ===
+=== [3] NtCreateEvent (event creation) ===
+=== [3] NtCreateEvent (event creation) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (file reading) ===
+
+=== [PROCESS] NtCreateUserProcess (child creation) ===
+
+=== [CHILD] NtOpenSection (child opens mapping) ===
+=== [2] NtMapViewOfSection ===
+=== [CHILD] NtOpenEvent (child opens event) ===
+=== [CHILD] NtOpenEvent (child opens event) ===
+
+# Number processing loop (5 times)
+=== [SIGNAL] NtSetEvent ===
+=== [WAIT] NtWaitForSingleObject ===
+=== [WRITE] NtWriteFile (console output) ===
+...
+=== [SIGNAL] NtSetEvent ===
+=== [WAIT] NtWaitForSingleObject ===
+...
+
+# Termination
+=== [SIGNAL] NtSetEvent ===
+=== [CLOSE] NtClose ===
+=== [WAIT] NtWaitForSingleObject ===
+=== [UNMAP] NtUnmapViewOfSection ===
+=== [CLOSE] NtClose ===
+...
+
+ntdll!NtTerminateProcess+0x14:
+00007ffc`b60e2244 c3              ret
+\end{verbatim}
+
+\subsubsection{Анализ трассировки}
+
+Трассировка подтверждает следующую последовательность системных вызовов:
+
+\textbf{Фаза 1: Инициализация Parent}
+\begin{enumerate}
+    \item \textbf{NtCreateSection} — создание file mapping объекта через \texttt{CreateFileMappingA()}
+    \item \textbf{NtMapViewOfSection} — отображение file mapping в адресное пространство parent
+    \item \textbf{NtCreateEvent} (2 раза) — создание EventRequest и EventResponse
+    \item \textbf{NtReadFile} — чтение файла с числами
+\end{enumerate}
+
+\textbf{Фаза 2: Запуск Child}
+\begin{enumerate}
+    \item \textbf{NtCreateUserProcess} — создание дочернего процесса через \texttt{CreateProcess()}
+    \item \textbf{NtOpenSection} — child открывает существующий file mapping через \texttt{OpenFileMappingA()}
+    \item \textbf{NtMapViewOfSection} — child отображает file mapping в свое адресное пространство
+    \item \textbf{NtOpenEvent} (2 раза) — child открывает события через \texttt{OpenEventA()}
+\end{enumerate}
+
+\textbf{Фаза 3: Обмен данными (Request-Response Pattern)}
+
+Для каждого числа в файле:
+\begin{enumerate}
+    \item \textbf{NtSetEvent} — parent сигнализирует child о новом запросе
+    \item \textbf{NtWaitForSingleObject} — parent блокируется в ожидании ответа
+    \item Child обрабатывает число (без системных вызовов — прямой доступ к памяти!)
+    \item \textbf{NtSetEvent} — child сигнализирует parent о готовности ответа
+    \item Parent читает ответ (без системных вызовов — прямой доступ к shared memory!)
+    \item \textbf{NtWriteFile} — вывод результата в консоль
+\end{enumerate}
+
+Паттерн повторяется 5 раз для 5 чисел в файле.
+
+\textbf{Фаза 4: Завершение}
+\begin{enumerate}
+    \item \textbf{NtSetEvent} — финальный сигнал для завершения child
+    \item \textbf{NtWaitForSingleObject} — parent ожидает завершения child процесса
+    \item \textbf{NtUnmapViewOfSection} — отмена отображения памяти (parent и child)
+    \item \textbf{NtClose} (многократно) — закрытие всех дескрипторов (file mapping, events, process)
+\end{enumerate}
+
+\subsubsection{Ключевые наблюдения}
+
+\begin{enumerate}
+    \item \textbf{Zero-copy передача данных:} Чтение/запись в SharedData не требует системных вызовов — это прямой доступ к отображенной памяти. В трассировке отсутствуют \texttt{NtReadFile}/\texttt{NtWriteFile} для обмена данными между процессами.
+    
+    \item \textbf{Синхронизация через Events:} Каждый цикл запрос-ответ требует 2 вызова \texttt{NtSetEvent} + 2 вызова \texttt{NtWaitForSingleObject}. Это основные накладные расходы IPC через file mapping.
+    
+    \item \textbf{Инициализация:} Создание file mapping + 2 events = 4 системных вызова. Это больше чем для pipes (2 вызова), но оправдано для частого обмена данными.
+    
+    \item \textbf{Child инициализация:} Открытие file mapping + 2 events = 3 системных вызова. Child не создает объекты, а подключается к существующим.
+\end{enumerate}
+
+\subsection{Системные вызовы Windows API}
+
+\subsubsection{CreateFileMappingA / NtCreateSection}
+
+Создает объект file mapping в системной памяти.
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{hFile} = INVALID\_HANDLE\_VALUE (системная память)
+    \item \texttt{lpAttributes} = nullptr (безопасность по умолчанию)
+    \item \texttt{flProtect} = PAGE\_READWRITE (чтение/запись)
+    \item \texttt{dwMaximumSizeLow} = sizeof(SharedData)
+    \item \texttt{lpName} = "Local\textbackslash Lab3SharedMemory"
+\end{itemize}
+
+\subsubsection{OpenFileMappingA / NtOpenSection}
+
+Открывает существующий именованный file mapping.
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{dwDesiredAccess} = FILE\_MAP\_ALL\_ACCESS
+    \item \texttt{bInheritHandle} = FALSE
+    \item \texttt{lpName} = "Local\textbackslash Lab3SharedMemory"
+\end{itemize}
+
+\subsubsection{MapViewOfFile / NtMapViewOfSection}
+
+Отображает file mapping в адресное пространство процесса.
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{hFileMappingObject} = hMapFile
+    \item \texttt{dwDesiredAccess} = FILE\_MAP\_ALL\_ACCESS
+    \item \texttt{dwNumberOfBytesToMap} = sizeof(SharedData)
+\end{itemize}
+
+\subsubsection{CreateEventA / NtCreateEvent}
+
+Создает именованное событие для синхронизации.
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{lpEventAttributes} = nullptr
+    \item \texttt{bManualReset} = FALSE (auto-reset event)
+    \item \texttt{bInitialState} = FALSE (non-signaled)
+    \item \texttt{lpName} = "Local\textbackslash Lab3EventRequest"
+\end{itemize}
+
+\subsubsection{SetEvent / NtSetEvent}
+
+Переводит событие в signaled состояние.
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{hEvent} = hEventRequest или hEventResponse
+\end{itemize}
+
+\subsubsection{WaitForSingleObject / NtWaitForSingleObject}
+
+Блокирует выполнение до перехода объекта в signaled состояние.
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{hHandle} = hEventResponse (для parent) или hEventRequest (для child)
+    \item \texttt{dwMilliseconds} = 5000 (таймаут) или INFINITE
+\end{itemize}

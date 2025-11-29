@@ -1,0 +1,115 @@
+\section{Выводы}
+
+В ходе выполнения лабораторной работы:
+
+\begin{enumerate}
+    \item Изучены механизмы межпроцессного взаимодействия (IPC) в Windows:
+    \begin{itemize}
+        \item \textbf{File Mapping} (Memory-Mapped Files) — разделяемая память между процессами
+        \item \textbf{Events} — объекты синхронизации для координации процессов
+        \item \textbf{Named Objects} — именованные объекты ядра для IPC
+    \end{itemize}
+    
+    \item Освоены системные вызовы Windows API для работы с file mapping:
+    \begin{itemize}
+        \item \texttt{CreateFileMappingA()} / \texttt{OpenFileMappingA()} — создание/открытие
+        \item \texttt{MapViewOfFile()} / \texttt{UnmapViewOfFile()} — отображение в память
+        \item \texttt{CreateEventA()} / \texttt{OpenEventA()} — работа с событиями
+        \item \texttt{SetEvent()} / \texttt{WaitForSingleObject()} — синхронизация
+    \end{itemize}
+    
+    \item Реализована программа межпроцессного взаимодействия через shared memory:
+    \begin{itemize}
+        \item Родительский процесс создает file mapping и события
+        \item Дочерний процесс открывает существующие объекты
+        \item Обмен данными через структуру в разделяемой памяти
+        \item Синхронизация доступа через auto-reset events
+        \item Реализован паттерн "запрос-ответ"
+    \end{itemize}
+    
+    \item Проведена трассировка системных вызовов с использованием WinDbg:
+    \begin{itemize}
+        \item Установлены breakpoint'ы на ключевые функции ntdll
+        \item Проанализирована последовательность системных вызовов
+        \item Получена статистика вызовов для каждой фазы работы
+    \end{itemize}
+    
+    \item Выявлены преимущества file mapping перед pipes:
+    \begin{itemize}
+        \item \textbf{Zero-copy} — передача данных без системных вызовов
+        \item \textbf{Высокая скорость} — прямой доступ к памяти
+        \item \textbf{Структурированные данные} — передача C++ структур напрямую
+        \item \textbf{Низкая задержка} — 0.1-0.5 мс против 1-5 мс для pipes
+    \end{itemize}
+    
+    \item Установлены недостатки file mapping:
+    \begin{itemize}
+        \item Требуется явная синхронизация (накладные расходы на events)
+        \item Более сложная реализация по сравнению с pipes
+        \item Только для процессов на одной машине
+        \item Риск race conditions при неправильной синхронизации
+    \end{itemize}
+    
+    \item Проанализированы накладные расходы:
+    \begin{itemize}
+        \item Инициализация: ~6 системных вызовов (создание mapping + 2 events)
+        \item Синхронизация: 2 системных вызова на цикл запрос-ответ
+        \item Передача данных: 0 системных вызовов (прямой доступ к памяти)
+        \item Очистка: ~10 системных вызовов (unmap + close handles)
+    \end{itemize}
+    
+    \item Сравнены механизмы IPC:
+    \begin{itemize}
+        \item \textbf{Pipes} — проще в использовании, автоматическая синхронизация, но требуют копирования данных
+        \item \textbf{File Mapping} — сложнее в реализации, требует явной синхронизации, но обеспечивает zero-copy и высокую производительность
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Практические рекомендации}
+
+\textbf{Когда использовать File Mapping:}
+\begin{itemize}
+    \item Частый обмен данными между процессами
+    \item Передача больших структур данных
+    \item Требования к минимальной задержке
+    \item Произвольный доступ к данным
+    \item Процессы на одной машине
+\end{itemize}
+
+\textbf{Когда использовать Pipes:}
+\begin{itemize}
+    \item Потоковая передача данных (stream-oriented)
+    \item Простота реализации важнее производительности
+    \item Односторонняя коммуникация (producer-consumer)
+    \item Возможность работы через сеть (named pipes)
+\end{itemize}
+
+\subsection{Области применения}
+
+File mapping и events используются в реальных системах:
+
+\begin{itemize}
+    \item \textbf{Браузеры} — multi-process architecture (Chrome, Firefox)
+    \item \textbf{Базы данных} — shared buffer pools (PostgreSQL, MySQL)
+    \item \textbf{Игровые движки} — обмен данными между процессами рендеринга
+    \item \textbf{Системное ПО} — Windows services communication
+    \item \textbf{Высокопроизводительные вычисления} — HPC кластеры
+\end{itemize}
+
+\subsection{Достижение целей работы}
+
+Цели лабораторной работы полностью достигнуты:
+
+\begin{enumerate}
+    \item \textbf{Управление процессами} — освоено создание дочерних процессов через \texttt{CreateProcess()}, получение кода возврата
+    
+    \item \textbf{Межпроцессное взаимодействие} — реализован обмен данными через file mapping без копирования
+    
+    \item \textbf{Синхронизация процессов} — освоена работа с events для координации доступа к shared memory
+    
+    \item \textbf{Трассировка системных вызовов} — проведен детальный анализ работы программы на уровне ядра
+\end{enumerate}
+
+File mapping — мощный механизм IPC, обеспечивающий высокую производительность за счет zero-copy передачи данных. При правильной синхронизации через events достигается эффективное взаимодействие процессов с минимальными накладными расходами.
+
+\pagebreak

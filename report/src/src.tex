@@ -1,0 +1,364 @@
+\section{Метод решения}
+
+\subsection{File Mapping (Memory-Mapped Files)}
+
+File mapping — механизм Windows для создания разделяемой памяти между процессами. Позволяет отобразить файл или системную память в адресное пространство процесса.
+
+\textbf{Преимущества перед Pipes:}
+\begin{itemize}
+    \item \textbf{Zero-copy} — прямой доступ к памяти без копирования данных
+    \item \textbf{Высокая скорость} — операции выполняются в пользовательском режиме
+    \item \textbf{Структурированные данные} — можно передавать C++ структуры напрямую
+    \item \textbf{Произвольный доступ} — чтение/запись в любом порядке
+\end{itemize}
+
+\textbf{Недостатки:}
+\begin{itemize}
+    \item Требуется явная синхронизация доступа
+    \item Более сложная реализация по сравнению с pipes
+    \item Только для процессов на одной машине
+\end{itemize}
+
+\subsection{События (Events) для синхронизации}
+
+События (Events) — объекты синхронизации Windows для координации выполнения потоков и процессов.
+
+\textbf{Типы событий:}
+\begin{itemize}
+    \item \textbf{Auto-reset} — автоматически сбрасывается после \texttt{WaitForSingleObject()}
+    \item \textbf{Manual-reset} — требует явного вызова \texttt{ResetEvent()}
+\end{itemize}
+
+В данной работе используются \textbf{auto-reset events} для реализации паттерна "запрос-ответ":
+\begin{itemize}
+    \item \texttt{EventRequest} — родитель сигнализирует ребенку о новом запросе
+    \item \texttt{EventResponse} — ребенок сигнализирует родителю о готовности ответа
+\end{itemize}
+
+\subsection{Структура разделяемой памяти}
+
+Данные передаются через структуру \texttt{SharedData}:
+
+\begin{lstlisting}[language=C++]
+struct SharedData {
+    int number;
+    int response;
+    bool has_request;
+    bool has_response;
+    bool should_terminate;
+};
+\end{lstlisting}
+
+Флаги \texttt{has\_request} и \texttt{has\_response} предотвращают race conditions при доступе к данным.
+
+\subsection{Алгоритм проверки простоты числа}
+
+Дочерний процесс проверяет число на простоту оптимизированным методом:
+
+\begin{lstlisting}[language=C++]
+bool is_prime(int n) {
+    if (n < 2) return false;
+    if (n == 2) return true;
+    if (n % 2 == 0) return false;
+    
+    for (int i = 3; i * i <= n; i += 2) {
+        if (n % i == 0) return false;
+    }
+    return true;
+}
+\end{lstlisting}
+
+Сложность: $O(\sqrt{n})$, проверяются только нечетные делители.
+
+\section{Описание программы}
+
+\subsection{Структура программы}
+
+Программа состоит из двух исполняемых файлов:
+
+\begin{itemize}
+    \item \texttt{parent.exe} — родительский процесс
+    \begin{itemize}
+        \item Создает file mapping и события
+        \item Запускает дочерний процесс
+        \item Читает файл с числами
+        \item Передает числа через shared memory
+        \item Получает и выводит результаты
+    \end{itemize}
+    
+    \item \texttt{child.exe} — дочерний процесс
+    \begin{itemize}
+        \item Открывает существующий file mapping
+        \item Открывает события для синхронизации
+        \item Обрабатывает числа из shared memory
+        \item Отправляет результаты обратно
+        \item Завершается при получении простого или отрицательного числа
+    \end{itemize}
+\end{itemize}
+
+\textbf{Общие модули:}
+\begin{itemize}
+    \item \texttt{common/comm.h} — система логирования с временными метками
+    \item \texttt{common/defines.h} — общие определения и подключение Windows API
+    \item \texttt{common/errors.h/cpp} — обработка ошибок через \texttt{ASSERT\_MSG}
+\end{itemize}
+
+\subsection{Используемые системные вызовы Windows API}
+
+\subsubsection{File Mapping}
+
+\textbf{CreateFileMappingA():}
+\begin{lstlisting}[language=C++]
+HANDLE CreateFileMappingA(
+    HANDLE hFile,                     // INVALID_HANDLE_VALUE for memory
+    LPSECURITY_ATTRIBUTES lpAttributes,
+    DWORD flProtect,                  // PAGE_READWRITE
+    DWORD dwMaximumSizeHigh,
+    DWORD dwMaximumSizeLow,           // sizeof(SharedData)
+    LPCSTR lpName                     // "Local\\Lab3SharedMemory"
+);
+\end{lstlisting}
+
+Создает объект file mapping в системной памяти. Родитель создает именованный объект, к которому затем подключается ребенок.
+
+\textbf{OpenFileMappingA():}
+\begin{lstlisting}[language=C++]
+HANDLE OpenFileMappingA(
+    DWORD dwDesiredAccess,            // FILE_MAP_ALL_ACCESS
+    BOOL bInheritHandle,
+    LPCSTR lpName                     // "Local\\Lab3SharedMemory"
+);
+\end{lstlisting}
+
+Открывает существующий именованный file mapping. Используется дочерним процессом.
+
+\textbf{MapViewOfFile():}
+\begin{lstlisting}[language=C++]
+LPVOID MapViewOfFile(
+    HANDLE hFileMappingObject,
+    DWORD dwDesiredAccess,            // FILE_MAP_ALL_ACCESS
+    DWORD dwFileOffsetHigh,
+    DWORD dwFileOffsetLow,
+    SIZE_T dwNumberOfBytesToMap       // sizeof(SharedData)
+);
+\end{lstlisting}
+
+Отображает file mapping в адресное пространство процесса. Возвращает указатель на структуру \texttt{SharedData}.
+
+\textbf{UnmapViewOfFile():}
+\begin{lstlisting}[language=C++]
+BOOL UnmapViewOfFile(LPCVOID lpBaseAddress);
+\end{lstlisting}
+
+Отменяет отображение при завершении работы.
+
+\subsubsection{Синхронизация через Events}
+
+\textbf{CreateEventA():}
+\begin{lstlisting}[language=C++]
+HANDLE CreateEventA(
+    LPSECURITY_ATTRIBUTES lpEventAttributes,
+    BOOL bManualReset,                // FALSE - auto-reset
+    BOOL bInitialState,               // FALSE - non-signaled
+    LPCSTR lpName                     // "Local\\Lab3EventRequest"
+);
+\end{lstlisting}
+
+Создает именованное событие. Auto-reset автоматически сбрасывает событие после \texttt{WaitForSingleObject()}.
+
+\textbf{OpenEventA():}
+\begin{lstlisting}[language=C++]
+HANDLE OpenEventA(
+    DWORD dwDesiredAccess,            // EVENT_ALL_ACCESS
+    BOOL bInheritHandle,
+    LPCSTR lpName                     // "Local\\Lab3EventRequest"
+);
+\end{lstlisting}
+
+Открывает существующее именованное событие (используется child процессом).
+
+\textbf{SetEvent():}
+\begin{lstlisting}[language=C++]
+BOOL SetEvent(HANDLE hEvent);
+\end{lstlisting}
+
+Переводит событие в signaled состояние, разблокируя ожидающий процесс.
+
+\textbf{WaitForSingleObject():}
+\begin{lstlisting}[language=C++]
+DWORD WaitForSingleObject(
+    HANDLE hHandle,
+    DWORD dwMilliseconds              // INFINITE or timeout
+);
+\end{lstlisting}
+
+Блокирует выполнение до перехода объекта в signaled состояние.
+
+\subsubsection{Управление процессами}
+
+\textbf{CreateProcess():}
+\begin{lstlisting}[language=C++]
+BOOL CreateProcess(
+    LPCSTR lpApplicationName,         // "child.exe"
+    LPSTR lpCommandLine,
+    // ... other parameters
+);
+\end{lstlisting}
+
+Создает новый процесс. Родитель запускает дочерний процесс после создания file mapping и событий.
+
+\textbf{GetExitCodeProcess():}
+\begin{lstlisting}[language=C++]
+BOOL GetExitCodeProcess(
+    HANDLE hProcess,
+    LPDWORD lpExitCode
+);
+\end{lstlisting}
+
+Получает код возврата завершившегося процесса.
+
+\subsection{Алгоритм работы родительского процесса}
+
+\begin{enumerate}
+    \item Запрос имени файла у пользователя
+    \item Открытие файла для чтения
+    \item Создание file mapping: \texttt{CreateFileMappingA()}
+    \item Отображение в память: \texttt{MapViewOfFile()}
+    \item Инициализация структуры \texttt{SharedData}
+    \item Создание событий: \texttt{CreateEventA()} для Request и Response
+    \item Запуск дочернего процесса: \texttt{CreateProcess("child.exe")}
+    \item Задержка для инициализации child
+    \item Цикл обработки чисел:
+    \begin{enumerate}
+        \item Чтение числа из файла
+        \item Запись числа в \texttt{pSharedData->number}
+        \item Установка флага \texttt{has\_request = true}
+        \item Сигнал child: \texttt{SetEvent(hEventRequest)}
+        \item Ожидание ответа: \texttt{WaitForSingleObject(hEventResponse, 5000)}
+        \item Проверка таймаута
+        \item Чтение ответа из \texttt{pSharedData->response}
+        \item Вывод результата
+        \item Сброс флага \texttt{has\_response = false}
+    \end{enumerate}
+    \item Сигнал завершения: \texttt{should\_terminate = true}
+    \item Ожидание завершения child: \texttt{WaitForSingleObject(pi.hProcess)}
+    \item Получение кода возврата: \texttt{GetExitCodeProcess()}
+    \item Очистка ресурсов:
+    \begin{itemize}
+        \item \texttt{UnmapViewOfFile()}
+        \item \texttt{CloseHandle()} для всех дескрипторов
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Алгоритм работы дочернего процесса}
+
+\begin{enumerate}
+    \item Открытие file mapping: \texttt{OpenFileMappingA()}
+    \item Отображение в память: \texttt{MapViewOfFile()}
+    \item Открытие событий: \texttt{OpenEventA()} для Request и Response
+    \item Основной цикл:
+    \begin{enumerate}
+        \item Ожидание запроса: \texttt{WaitForSingleObject(hEventRequest, INFINITE)}
+        \item Проверка флага \texttt{should\_terminate} — выход из цикла
+        \item Проверка флага \texttt{has\_request}
+        \item Чтение числа: \texttt{number = pSharedData->number}
+        \item Проверка числа:
+        \begin{itemize}
+            \item Если \texttt{number < 0}: установить \texttt{should\_terminate = true}, выход
+            \item Если \texttt{is\_prime(number)}: установить \texttt{should\_terminate = true}, выход
+            \item Если составное: записать в \texttt{pSharedData->response}
+        \end{itemize}
+        \item Установка флагов: \texttt{has\_response = true}, \texttt{has\_request = false}
+        \item Сигнал parent: \texttt{SetEvent(hEventResponse)}
+    \end{enumerate}
+    \item Очистка ресурсов:
+    \begin{itemize}
+        \item \texttt{UnmapViewOfFile()}
+        \item \texttt{CloseHandle()} для всех дескрипторов
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Последовательность взаимодействия}
+
+\begin{verbatim}
+Parent                          Child
+  |
+  +- CreateFileMapping()
+  +- MapViewOfFile()
+  +- CreateEvent(Request)
+  +- CreateEvent(Response)
+  +- CreateProcess() ----------> |
+  |                              +- OpenFileMapping()
+  |                              +- MapViewOfFile()
+  |                              +- OpenEvent(Request)
+  |                              +- OpenEvent(Response)
+  |                              +- WaitForSingleObject(Request)
+  |                              |   [WAITING...]
+  +- Write number
+  +- has_request = true
+  +- SetEvent(Request) ----------> |
+  +- WaitForSingleObject(Response)+- Read number
+  |   [WAITING...]               +- Check prime
+  |                              +- Write response
+  |                              +- has_response = true
+  |                              +- SetEvent(Response)
+  |                              +- WaitForSingleObject(Request)
+  |                                  [WAITING...]
+  +- Read response <--------------+
+  +- has_response = false
+  +- [repeat for next number]
+\end{verbatim}
+
+\subsection{Именование объектов в Windows}
+
+Используется префикс \texttt{Local\textbackslash} для именования объектов:
+\begin{itemize}
+    \item \texttt{Local\textbackslash Lab3SharedMemory} — file mapping
+    \item \texttt{Local\textbackslash Lab3EventRequest} — событие запроса
+    \item \texttt{Local\textbackslash Lab3EventResponse} — событие ответа
+\end{itemize}
+
+Префикс \texttt{Local\textbackslash} гарантирует, что объекты создаются в локальном пространстве имён текущего сеанса пользователя. Альтернатива — \texttt{Global\textbackslash} для доступа из разных сеансов.
+
+\subsection{Обработка ошибок и таймауты}
+
+\textbf{Проверка системных вызовов:}
+Все критические вызовы проверяются через макрос \texttt{ASSERT\_MSG()}:
+\begin{lstlisting}[language=C++]
+ASSERT_MSG(hMapFile != nullptr, "Can't opern the file");
+\end{lstlisting}
+
+При ошибке выводится сообщение с указанием файла и строки, программа завершается.
+
+\textbf{Таймаут ожидания:}
+Родитель использует таймаут 5 секунд при ожидании ответа:
+\begin{lstlisting}[language=C++]
+DWORD wait_result = WaitForSingleObject(hEventResponse, 5000);
+if (wait_result == WAIT_TIMEOUT) {
+    LogErr("parent", "Timeout");
+    break;
+}
+\end{lstlisting}
+
+Это предотвращает зависание при сбое дочернего процесса.
+
+\subsection{Формат входного файла}
+
+Файл содержит числа (по одному на строку):
+\begin{lstlisting}
+15
+20
+8
+12
+7
+\end{lstlisting}
+
+При обработке этого файла:
+\begin{itemize}
+    \item 15 — составное → возвращается родителю
+    \item 20 — составное → возвращается родителю
+    \item 8 — составное → возвращается родителю
+    \item 12 — составное → возвращается родителю
+    \item 7 — \textbf{простое} → оба процесса завершаются
+\end{itemize}
+

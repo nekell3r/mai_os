@@ -1,9 +1,0 @@
-D:/programming_projects/mai_os/lab3/build/CMakeFiles/edit_cache.dir
-D:/programming_projects/mai_os/lab3/build/CMakeFiles/rebuild_cache.dir
-D:/programming_projects/mai_os/lab3/build/common/CMakeFiles/common.dir
-D:/programming_projects/mai_os/lab3/build/common/CMakeFiles/edit_cache.dir
-D:/programming_projects/mai_os/lab3/build/common/CMakeFiles/rebuild_cache.dir
-D:/programming_projects/mai_os/lab3/build/src/CMakeFiles/parent.dir
-D:/programming_projects/mai_os/lab3/build/src/CMakeFiles/child.dir
-D:/programming_projects/mai_os/lab3/build/src/CMakeFiles/edit_cache.dir
-D:/programming_projects/mai_os/lab3/build/src/CMakeFiles/rebuild_cache.dir

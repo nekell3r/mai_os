@@ -1,7 +1,0 @@
-# ninja log v6
-46	2056	7857796186517525	common/CMakeFiles/common.dir/errors.cpp.obj	2d7efd2687093927
-54	2229	7857796186602734	src/CMakeFiles/child.dir/child.cpp.obj	ab28a582e3b895ed
-50	2207	7857796186562759	src/CMakeFiles/parent.dir/parent.cpp.obj	a926097d17ecb958
-2057	2271	7857796206625229	common/libcommon.a	339559ea3d32835f
-2284	2475	7857796208890310	src/child.exe	4fb278acfcb9a5e8
-2271	2467	7857796208773535	src/parent.exe	2fb87b5c9d32d90
