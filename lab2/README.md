@@ -21,7 +21,7 @@ ninja
 ## Запуск
 
 ```bash
-cd build\src
+cd src
 .\median_filter.exe [опции]
 ```
 
