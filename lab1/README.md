@@ -16,7 +16,7 @@ ninja
 ## Запуск
 
 ```powershell
-cd build\src
+cd src
 copy ..\..\test_numbers.txt .
 
 # Интерактивно
