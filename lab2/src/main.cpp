@@ -144,10 +144,6 @@ int main(int argc, char* argv[]) {
         
         LogMsg("main", "Готово!");
         
-        std::cout << "\nДля просмотра потоков во время выполнения используйте:\n";
-        std::cout << "  Task Manager -> Подробности -> Выберите процесс -> Потоки\n";
-        std::cout << "  Или PowerShell: Get-Process -Name median_filter | Select-Object -ExpandProperty Threads\n";
-        
     } catch (const std::exception& e) {
         std::stringstream err_msg;
         err_msg << "Исключение: " << e.what();
