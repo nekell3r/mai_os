@@ -25,4 +25,3 @@ using BYTE = unsigned char;
 
 #define LogWarn(category, message) \
     Log(std::cout, "WARN", category, message);
-
