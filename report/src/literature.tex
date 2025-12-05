@@ -1,71 +1,93 @@
 \section{Исходная программа}
 
-\subsection{Вспомогательные модули (common)}
+\subsection{Интерфейс}
 
-\subsubsection{comm.h}
+\subsubsection{sort\_interface.h}
 
-\lstinputlisting[language=C++,caption=comm.h,basicstyle=\tiny\ttfamily]{inc/comm.h}
+\lstinputlisting[language=C++,caption=sort\_interface.h,basicstyle=\tiny\ttfamily]{inc/sort_interface.h}
 
-\subsubsection{defines.h}
+\subsection{Реализации динамических библиотек}
 
-\lstinputlisting[language=C++,caption=defines.h,basicstyle=\tiny\ttfamily]{inc/defines.h}
+\subsubsection{bubble\_sort.cpp}
 
-\subsubsection{errors.h}
+\lstinputlisting[language=C++,caption=bubble\_sort.cpp,basicstyle=\small\ttfamily]{inc/bubble_sort.cpp}
 
-\lstinputlisting[language=C++,caption=errors.h,basicstyle=\tiny\ttfamily]{inc/errors.h}
+\subsubsection{quicksort.cpp}
 
-\subsubsection{errors.hpp}
+\lstinputlisting[language=C++,caption=quicksort.cpp,basicstyle=\small\ttfamily]{inc/quicksort.cpp}
 
-\lstinputlisting[language=C++,caption=errors.hpp,basicstyle=\tiny\ttfamily]{inc/errors.hpp}
+\subsection{Тестовые программы}
 
-\subsubsection{errors.cpp}
+\subsubsection{program1.cpp}
 
-\lstinputlisting[language=C++,caption=errors.cpp,basicstyle=\small\ttfamily]{inc/errors.cpp}
+\lstinputlisting[language=C++,caption=program1.cpp,basicstyle=\small\ttfamily]{inc/program1.cpp}
 
-\subsection{Основные модули}
+\subsubsection{program2.cpp}
 
-\subsubsection{parent.cpp}
-
-\lstinputlisting[language=C++,caption=parent.cpp,basicstyle=\small\ttfamily]{inc/parent.cpp}
-
-\subsubsection{child.cpp}
-
-\lstinputlisting[language=C++,caption=child.cpp,basicstyle=\small\ttfamily]{inc/child.cpp}
+\lstinputlisting[language=C++,caption=program2.cpp,basicstyle=\small\ttfamily]{inc/program2.cpp}
 
 \subsection{Тестовый запуск программы}
 
-Программа была запущена для обработки файла с числами \texttt{test\_numbers.txt}.
+\subsubsection{Program 1 (Статическая линковка)}
 
 \textbf{Команда запуска:}
 
 \begin{verbatim}
-D:\programming_projects\mai_os\lab3\build\src> .\parent.exe
-Enter filename: test_numbers.txt
+D:\programming_projects\mai_os\lab4\build> .\program1.exe
 \end{verbatim}
 
 \textbf{Вывод программы:}
 
 \begin{verbatim}
-Enter filename: test_numbers.txt
-16-00-21MSG parent Reading file 'test_numbers.txt'
-16-00-21MSG parent Shared memory initialized
-16-00-21MSG parent Synchronization events created
-16-00-21MSG parent Child process started
-16-00-21MSG parent Sending number 15 to child process
-16-00-21MSG parent Received composite number 15 from child process
-16-00-21MSG parent Sending number 20 to child process
-16-00-21MSG parent Received composite number 20 from child process
-16-00-21MSG parent Sending number 8 to child process
-16-00-21MSG parent Received composite number 8 from child process
-16-00-21MSG parent Sending number 12 to child process
-16-00-21MSG parent Received composite number 12 from child process
-16-00-21MSG parent Sending number 7 to child process
-16-00-21MSG parent Received termination signal from child process
-16-00-21MSG parent Child process exited with code 0
-16-00-21MSG parent Shutting down
+=== Program 1: Static Linking ===
+Using: Bubble Sort (statically linked)
+Commands:
+  1 <num1> <num2> ... <numN>  - Sort array
+  exit  - Exit program
+
+> 1 5 2 8 1 3
+23-56-59MSG program1 Input array:
+5 2 8 1 3
+23-56-59MSG program1 Sorted array:
+1 2 3 5 8
+> exit
+23-56-59MSG program1 Exiting...
 \end{verbatim}
 
-Программа успешно создала file mapping, два события синхронизации и дочерний процесс. Обработала числа 15, 20, 8, 12 (составные) и завершилась при получении числа 7 (простое).
+Программа успешно использует статически слинкованную функцию сортировки. Код сортировки включен в исполняемый файл на этапе компиляции.
+
+\subsubsection{Program 2 (Динамическая загрузка)}
+
+\textbf{Команда запуска:}
+
+\begin{verbatim}
+D:\programming_projects\mai_os\lab4\build> .\program2.exe
+\end{verbatim}
+
+\textbf{Вывод программы:}
+
+\begin{verbatim}
+=== Program 2: Dynamic Loading ===
+Commands:
+  0  - Switch between bubble_sort.dll and quicksort.dll
+  1 <num1> <num2> ... <numN>  - Sort array
+  exit  - Exit program
+
+23-56-59MSG program2 Library loaded: bubble_sort.dll
+> 0
+23-56-59MSG program2 Library unloaded
+23-56-59MSG program2 Library loaded: quicksort.dll
+23-56-59MSG program2 Switched to: QuickSort (Hoare)
+> 1 5 2 8 1 3
+23-56-59MSG program2 Input array:
+5 2 8 1 3
+23-56-59MSG program2 Sorted array:
+1 2 3 5 8
+> exit
+23-56-59MSG program2 Exiting...
+\end{verbatim}
+
+Программа успешно загружает DLL во время выполнения, переключается между реализациями и использует функции через указатели.
 
 \subsection{Трассировка системных вызовов (WinDbg)}
 
@@ -74,196 +96,258 @@ Enter filename: test_numbers.txt
 \subsubsection{Команды WinDbg}
 
 \begin{verbatim}
-windbg .\build\src\parent.exe
+cd lab4
+windbg .\build\program2.exe
 
-# File Mapping
-bp ntdll!NtCreateSection ".echo === [1] NtCreateSection ===; g"
-bp ntdll!NtMapViewOfSection ".echo === [2] NtMapViewOfSection ===; g"
-bp ntdll!NtUnmapViewOfSection ".echo === [UNMAP] NtUnmapViewOfSection ===; g"
+# Загрузка символов
+.reload
+ld ntdll
 
-# Events
-bp ntdll!NtCreateEvent ".echo === [3] NtCreateEvent ===; g"
-bp ntdll!NtOpenEvent ".echo === [CHILD] NtOpenEvent ===; g"
-bp ntdll!NtSetEvent ".echo === [SIGNAL] NtSetEvent ===; g"
+# DLL Loading (Native API - NTDLL)
+bp ntdll!LdrLoadDll ".echo === [LOAD] LdrLoadDll (LoadLibraryA) ===; g"
+bp ntdll!LdrGetProcedureAddress ".echo === [PROC] LdrGetProcedureAddress (GetProcAddress) ===; g"
+bp ntdll!LdrUnloadDll ".echo === [FREE] LdrUnloadDll (FreeLibrary) ===; g"
 
-# Processes
-bp ntdll!NtCreateUserProcess ".echo === [PROCESS] NtCreateUserProcess ===; g"
-bp ntdll!NtWaitForSingleObject ".echo === [WAIT] NtWaitForSingleObject ===; g"
+# Memory mapping для DLL
+bp ntdll!NtOpenSection ".echo === [OPEN] NtOpenSection (DLL) ===; g"
+bp ntdll!NtMapViewOfSection ".echo === [MAP] NtMapViewOfSection (DLL) ===; g"
+bp ntdll!NtUnmapViewOfSection ".echo === [UNMAP] NtUnmapViewOfSection (DLL) ===; g"
 
 # I/O
-bp ntdll!NtReadFile ".echo === [READ] NtReadFile ===; g"
-bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile ===; g"
-
-# Memory
-bp ntdll!NtOpenSection ".echo === [CHILD] NtOpenSection ===; g"
+bp ntdll!NtReadFile ".echo === [READ] NtReadFile (console input) ===; g"
+bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile (console output) ===; g"
 
 # Cleanup
 bp ntdll!NtClose ".echo === [CLOSE] NtClose ===; g"
 
-.logopen trace_lab3_full.log
+.logopen trace_lab4_full.log
 g
 \end{verbatim}
 
 \subsubsection{Результаты трассировки}
 
-Ниже представлен фрагмент лога с ключевыми системными вызовами:
+Ниже представлен фрагмент лога с ключевыми системными вызовами (повторяющиеся строки сокращены):
 
 \begin{verbatim}
-... (initialization) ...
+... (initialization - загрузка системных DLL: advapi32.dll, msvcrt.dll, 
+     sechost.dll, RPCRT4.dll и др.) ...
 
-=== [1] NtCreateSection (CreateFileMapping) ===
-=== [2] NtMapViewOfSection ===
-=== [3] NtCreateEvent (event creation) ===
-=== [3] NtCreateEvent (event creation) ===
 === [WRITE] NtWriteFile (console output) ===
-=== [READ] NtReadFile (file reading) ===
+... (вывод приветственного сообщения) ...
 
-=== [PROCESS] NtCreateUserProcess (child creation) ===
-
-=== [CHILD] NtOpenSection (child opens mapping) ===
-=== [2] NtMapViewOfSection ===
-=== [CHILD] NtOpenEvent (child opens event) ===
-=== [CHILD] NtOpenEvent (child opens event) ===
-
-# Number processing loop (5 times)
-=== [SIGNAL] NtSetEvent ===
-=== [WAIT] NtWaitForSingleObject ===
+# Initial DLL load (bubble_sort.dll)
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`aa090000 00007ffe`aa0b1000   
+        D:\programming_projects\mai_os\lab4\build\bubble_sort.dll
+=== [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [WRITE] NtWriteFile (console output) ===
-...
-=== [SIGNAL] NtSetEvent ===
-=== [WAIT] NtWaitForSingleObject ===
-...
+... (вывод "Library loaded: bubble_sort.dll") ...
 
-# Termination
-=== [SIGNAL] NtSetEvent ===
+# User input: "0" (switch DLL)
+=== [READ] NtReadFile (console input) ===
+=== [FREE] LdrUnloadDll (FreeLibrary) ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
 === [CLOSE] NtClose ===
-=== [WAIT] NtWaitForSingleObject ===
-=== [UNMAP] NtUnmapViewOfSection ===
-=== [CLOSE] NtClose ===
-...
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`aa6b0000 00007ffe`aa6d1000   
+        D:\programming_projects\mai_os\lab4\build\quicksort.dll
+=== [PROC] LdrGetProcedureAddress (GetProcAddress) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Switched to: QuickSort (Hoare)") ...
 
-ntdll!NtTerminateProcess+0x14:
-00007ffc`b60e2244 c3              ret
+# User input: "1 5 2 8 1 3" (sort array)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Input array: 5 2 8 1 3") ...
+... (sorting happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Sorted array: 1 2 3 5 8") ...
+
+# User input: "exit"
+=== [READ] NtReadFile (console input) ===
+=== [FREE] LdrUnloadDll (FreeLibrary) ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Exiting...") ...
 \end{verbatim}
 
 \subsubsection{Анализ трассировки}
 
 Трассировка подтверждает следующую последовательность системных вызовов:
 
-\textbf{Фаза 1: Инициализация Parent}
+\textbf{Фаза 1: Инициализация процесса}
 \begin{enumerate}
-    \item \textbf{NtCreateSection} — создание file mapping объекта через \texttt{CreateFileMappingA()}
-    \item \textbf{NtMapViewOfSection} — отображение file mapping в адресное пространство parent
-    \item \textbf{NtCreateEvent} (2 раза) — создание EventRequest и EventResponse
-    \item \textbf{NtReadFile} — чтение файла с числами
+    \item Загрузка системных DLL (advapi32.dll, msvcrt.dll, sechost.dll, RPCRT4.dll и др.) через \texttt{LdrLoadDll}
+    \item Множественные вызовы \texttt{NtOpenSection} и \texttt{NtMapViewOfSection} для маппинга системных библиотек
+    \item Вывод приветственного сообщения через \texttt{NtWriteFile}
 \end{enumerate}
 
-\textbf{Фаза 2: Запуск Child}
+\textbf{Фаза 2: Загрузка пользовательской DLL (bubble\_sort.dll)}
 \begin{enumerate}
-    \item \textbf{NtCreateUserProcess} — создание дочернего процесса через \texttt{CreateProcess()}
-    \item \textbf{NtOpenSection} — child открывает существующий file mapping через \texttt{OpenFileMappingA()}
-    \item \textbf{NtMapViewOfSection} — child отображает file mapping в свое адресное пространство
-    \item \textbf{NtOpenEvent} (2 раза) — child открывает события через \texttt{OpenEventA()}
+    \item \textbf{LdrLoadDll} — загрузка DLL в память процесса (вызывается из \texttt{LoadLibraryA()})
+    \item \textbf{NtOpenSection} — открытие секции DLL в системной памяти
+    \item \textbf{NtMapViewOfSection} — отображение DLL в адресное пространство процесса (видно ModLoad сообщение)
+    \item \textbf{LdrGetProcedureAddress} — получение адреса функции \texttt{Sort} (вызывается из \texttt{GetProcAddress()})
+    \item Множественные \texttt{NtClose} — закрытие дескрипторов, созданных при загрузке
 \end{enumerate}
 
-\textbf{Фаза 3: Обмен данными (Request-Response Pattern)}
-
-Для каждого числа в файле:
+\textbf{Фаза 3: Переключение DLL (команда "0")}
 \begin{enumerate}
-    \item \textbf{NtSetEvent} — parent сигнализирует child о новом запросе
-    \item \textbf{NtWaitForSingleObject} — parent блокируется в ожидании ответа
-    \item Child обрабатывает число (без системных вызовов — прямой доступ к памяти!)
-    \item \textbf{NtSetEvent} — child сигнализирует parent о готовности ответа
-    \item Parent читает ответ (без системных вызовов — прямой доступ к shared memory!)
-    \item \textbf{NtWriteFile} — вывод результата в консоль
+    \item \textbf{NtReadFile} — чтение команды из консоли
+    \item \textbf{LdrUnloadDll} — выгрузка текущей DLL (вызывается из \texttt{FreeLibrary()})
+    \item \textbf{NtUnmapViewOfSection} — отмена отображения DLL из памяти
+    \item \textbf{NtClose} — закрытие дескрипторов
+    \item Повторение фазы 2 для загрузки \texttt{quicksort.dll}
 \end{enumerate}
 
-Паттерн повторяется 5 раз для 5 чисел в файле.
-
-\textbf{Фаза 4: Завершение}
+\textbf{Фаза 4: Выполнение сортировки (команда "1")}
 \begin{enumerate}
-    \item \textbf{NtSetEvent} — финальный сигнал для завершения child
-    \item \textbf{NtWaitForSingleObject} — parent ожидает завершения child процесса
-    \item \textbf{NtUnmapViewOfSection} — отмена отображения памяти (parent и child)
-    \item \textbf{NtClose} (многократно) — закрытие всех дескрипторов (file mapping, events, process)
+    \item \textbf{NtReadFile} — чтение команды и аргументов из консоли
+    \item \textbf{NtWriteFile} — вывод входного массива
+    \item \textbf{Выполнение сортировки} — происходит в коде DLL без дополнительных системных вызовов (обычный код в адресном пространстве процесса)
+    \item \textbf{NtWriteFile} — вывод отсортированного массива
+\end{enumerate}
+
+\textbf{Фаза 5: Завершение (команда "exit")}
+\begin{enumerate}
+    \item \textbf{NtReadFile} — чтение команды выхода
+    \item \textbf{LdrUnloadDll} — выгрузка DLL
+    \item \textbf{NtUnmapViewOfSection} — отмена отображения DLL
+    \item \textbf{NtClose} — закрытие всех дескрипторов
+    \item \textbf{NtWriteFile} — вывод сообщения о завершении
 \end{enumerate}
 
 \subsubsection{Ключевые наблюдения}
 
 \begin{enumerate}
-    \item \textbf{Zero-copy передача данных:} Чтение/запись в SharedData не требует системных вызовов — это прямой доступ к отображенной памяти. В трассировке отсутствуют \texttt{NtReadFile}/\texttt{NtWriteFile} для обмена данными между процессами.
+    \item \textbf{Загрузка DLL:} Процесс загрузки DLL включает несколько системных вызовов:
+    \begin{itemize}
+        \item \texttt{LdrLoadDll} — основная функция загрузки
+        \item \texttt{NtOpenSection} — открытие секции DLL
+        \item \texttt{NtMapViewOfSection} — маппинг DLL в память
+        \item \texttt{LdrGetProcedureAddress} — получение адреса функции
+    \end{itemize}
+    Это больше системных вызовов, чем при статической линковке (где все разрешается на этапе компиляции).
     
-    \item \textbf{Синхронизация через Events:} Каждый цикл запрос-ответ требует 2 вызова \texttt{NtSetEvent} + 2 вызова \texttt{NtWaitForSingleObject}. Это основные накладные расходы IPC через file mapping.
+    \item \textbf{Выполнение кода DLL:} После загрузки DLL код выполняется напрямую в адресном пространстве процесса. Сортировка массива не требует дополнительных системных вызовов — это обычный пользовательский код.
     
-    \item \textbf{Инициализация:} Создание file mapping + 2 events = 4 системных вызова. Это больше чем для pipes (2 вызова), но оправдано для частого обмена данными.
+    \item \textbf{Переключение DLL:} При переключении между библиотеками происходит полная выгрузка одной DLL и загрузка другой. Это включает:
+    \begin{itemize}
+        \item Вызов \texttt{LdrUnloadDll} для выгрузки
+        \item Вызов \texttt{NtUnmapViewOfSection} для отмены маппинга
+        \item Повторение процесса загрузки для новой DLL
+    \end{itemize}
     
-    \item \textbf{Child инициализация:} Открытие file mapping + 2 events = 3 системных вызова. Child не создает объекты, а подключается к существующим.
+    \item \textbf{Инициализация процесса:} В начале работы программы загружается множество системных DLL (advapi32.dll, msvcrt.dll и др.). Это нормальное поведение Windows при запуске любого процесса.
+    
+    \item \textbf{Сравнение со статической линковкой:} При статической линковке (Program 1) все эти системные вызовы отсутствуют — код сортировки уже включен в .exe файл. Это видно по отсутствию вызовов \texttt{LdrLoadDll} и \texttt{LdrGetProcedureAddress} в Program 1.
 \end{enumerate}
 
 \subsection{Системные вызовы Windows API}
 
-\subsubsection{CreateFileMappingA / NtCreateSection}
+\subsubsection{LoadLibraryA() / LdrLoadDll()}
 
-Создает объект file mapping в системной памяти.
+Загружает DLL в адресное пространство процесса.
+
+\textbf{Высокоуровневый API:}
+\begin{lstlisting}[language=C++]
+HMODULE LoadLibraryA(LPCSTR lpLibFileName);
+\end{lstlisting}
+
+\textbf{Низкоуровневый вызов (NTDLL):}
+\begin{lstlisting}[language=C++]
+NTSTATUS LdrLoadDll(
+    PWSTR DllPath,
+    PULONG DllCharacteristics,
+    PUNICODE_STRING DllName,
+    PVOID *BaseAddress
+);
+\end{lstlisting}
+
+\textbf{Процесс загрузки:}
+\begin{enumerate}
+    \item Поиск DLL в системных путях и текущей директории
+    \item Открытие секции DLL через \texttt{NtOpenSection}
+    \item Маппинг DLL в память через \texttt{NtMapViewOfSection}
+    \item Выполнение инициализации DLL (DllMain, если есть)
+    \item Возврат handle модуля
+\end{enumerate}
+
+\subsubsection{GetProcAddress() / LdrGetProcedureAddress()}
+
+Получает адрес экспортируемой функции из загруженной DLL.
+
+\textbf{Высокоуровневый API:}
+\begin{lstlisting}[language=C++]
+FARPROC GetProcAddress(
+    HMODULE hModule,
+    LPCSTR lpProcName
+);
+\end{lstlisting}
+
+\textbf{Низкоуровневый вызов (NTDLL):}
+\begin{lstlisting}[language=C++]
+NTSTATUS LdrGetProcedureAddress(
+    HMODULE ModuleHandle,
+    PANSI_STRING FunctionName,
+    WORD Ordinal,
+    PVOID *FunctionAddress
+);
+\end{lstlisting}
+
+\textbf{Процесс поиска:}
+\begin{enumerate}
+    \item Поиск функции в таблице экспорта DLL
+    \item Проверка имени функции или порядкового номера
+    \item Возврат адреса функции в памяти
+\end{enumerate}
+
+\subsubsection{FreeLibrary() / LdrUnloadDll()}
+
+Выгружает DLL из памяти процесса.
+
+\textbf{Высокоуровневый API:}
+\begin{lstlisting}[language=C++]
+BOOL FreeLibrary(HMODULE hLibModule);
+\end{lstlisting}
+
+\textbf{Низкоуровневый вызов (NTDLL):}
+\begin{lstlisting}[language=C++]
+NTSTATUS LdrUnloadDll(HMODULE ModuleHandle);
+\end{lstlisting}
+
+\textbf{Процесс выгрузки:}
+\begin{enumerate}
+    \item Выполнение финализации DLL (DllMain с флагом DLL\_PROCESS\_DETACH, если есть)
+    \item Отмена маппинга через \texttt{NtUnmapViewOfSection}
+    \item Закрытие дескрипторов через \texttt{NtClose}
+    \item Освобождение памяти
+\end{enumerate}
+
+\subsubsection{NtMapViewOfSection()}
+
+Отображает секцию (включая DLL) в адресное пространство процесса.
 
 \textbf{Параметры:}
 \begin{itemize}
-    \item \texttt{hFile} = INVALID\_HANDLE\_VALUE (системная память)
-    \item \texttt{lpAttributes} = nullptr (безопасность по умолчанию)
-    \item \texttt{flProtect} = PAGE\_READWRITE (чтение/запись)
-    \item \texttt{dwMaximumSizeLow} = sizeof(SharedData)
-    \item \texttt{lpName} = "Local\textbackslash Lab3SharedMemory"
+    \item \texttt{SectionHandle} — handle секции (DLL)
+    \item \texttt{ProcessHandle} — handle процесса (текущий процесс)
+    \item \texttt{BaseAddress} — базовый адрес для маппинга
+    \item \texttt{ViewSize} — размер отображаемой области
+    \item \texttt{Protect} — права доступа (PAGE\_EXECUTE\_READ для DLL)
 \end{itemize}
 
-\subsubsection{OpenFileMappingA / NtOpenSection}
+\subsubsection{NtUnmapViewOfSection()}
 
-Открывает существующий именованный file mapping.
-
-\textbf{Параметры:}
-\begin{itemize}
-    \item \texttt{dwDesiredAccess} = FILE\_MAP\_ALL\_ACCESS
-    \item \texttt{bInheritHandle} = FALSE
-    \item \texttt{lpName} = "Local\textbackslash Lab3SharedMemory"
-\end{itemize}
-
-\subsubsection{MapViewOfFile / NtMapViewOfSection}
-
-Отображает file mapping в адресное пространство процесса.
+Отменяет отображение секции из адресного пространства процесса.
 
 \textbf{Параметры:}
 \begin{itemize}
-    \item \texttt{hFileMappingObject} = hMapFile
-    \item \texttt{dwDesiredAccess} = FILE\_MAP\_ALL\_ACCESS
-    \item \texttt{dwNumberOfBytesToMap} = sizeof(SharedData)
-\end{itemize}
-
-\subsubsection{CreateEventA / NtCreateEvent}
-
-Создает именованное событие для синхронизации.
-
-\textbf{Параметры:}
-\begin{itemize}
-    \item \texttt{lpEventAttributes} = nullptr
-    \item \texttt{bManualReset} = FALSE (auto-reset event)
-    \item \texttt{bInitialState} = FALSE (non-signaled)
-    \item \texttt{lpName} = "Local\textbackslash Lab3EventRequest"
-\end{itemize}
-
-\subsubsection{SetEvent / NtSetEvent}
-
-Переводит событие в signaled состояние.
-
-\textbf{Параметры:}
-\begin{itemize}
-    \item \texttt{hEvent} = hEventRequest или hEventResponse
-\end{itemize}
-
-\subsubsection{WaitForSingleObject / NtWaitForSingleObject}
-
-Блокирует выполнение до перехода объекта в signaled состояние.
-
-\textbf{Параметры:}
-\begin{itemize}
-    \item \texttt{hHandle} = hEventResponse (для parent) или hEventRequest (для child)
-    \item \texttt{dwMilliseconds} = 5000 (таймаут) или INFINITE
+    \item \texttt{ProcessHandle} — handle процесса
+    \item \texttt{BaseAddress} — базовый адрес отображенной секции
 \end{itemize}

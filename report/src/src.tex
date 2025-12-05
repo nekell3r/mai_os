@@ -1,364 +1,335 @@
 \section{Метод решения}
 
-\subsection{File Mapping (Memory-Mapped Files)}
+\subsection{Динамические библиотеки (DLL) в Windows}
 
-File mapping — механизм Windows для создания разделяемой памяти между процессами. Позволяет отобразить файл или системную память в адресное пространство процесса.
+Динамические библиотеки (Dynamic Link Libraries, DLL) — это модули кода, которые загружаются в память процесса во время выполнения программы. В отличие от статической линковки, где код библиотеки включается в исполняемый файл на этапе компиляции, DLL загружаются по требованию.
 
-\textbf{Преимущества перед Pipes:}
+\textbf{Преимущества динамических библиотек:}
 \begin{itemize}
-    \item \textbf{Zero-copy} — прямой доступ к памяти без копирования данных
-    \item \textbf{Высокая скорость} — операции выполняются в пользовательском режиме
-    \item \textbf{Структурированные данные} — можно передавать C++ структуры напрямую
-    \item \textbf{Произвольный доступ} — чтение/запись в любом порядке
+    \item \textbf{Экономия памяти} — одна копия DLL может использоваться несколькими процессами
+    \item \textbf{Модульность} — можно обновлять библиотеки без перекомпиляции основной программы
+    \item \textbf{Гибкость} — выбор реализации во время выполнения
+    \item \textbf{Разделение кода} — уменьшение размера исполняемых файлов
 \end{itemize}
 
 \textbf{Недостатки:}
 \begin{itemize}
-    \item Требуется явная синхронизация доступа
-    \item Более сложная реализация по сравнению с pipes
-    \item Только для процессов на одной машине
+    \item Требуется наличие DLL файлов в системе
+    \item Возможны проблемы с версиями (DLL Hell)
+    \item Накладные расходы на загрузку во время выполнения
 \end{itemize}
 
-\subsection{События (Events) для синхронизации}
+\subsection{Два способа использования библиотек}
 
-События (Events) — объекты синхронизации Windows для координации выполнения потоков и процессов.
+\subsubsection{Статическая линковка (Program 1)}
 
-\textbf{Типы событий:}
+При статической линковке код библиотеки включается в исполняемый файл на этапе компиляции. Линкер разрешает все ссылки на функции библиотеки, и они становятся частью .exe файла.
+
+\textbf{Характеристики:}
 \begin{itemize}
-    \item \textbf{Auto-reset} — автоматически сбрасывается после \texttt{WaitForSingleObject()}
-    \item \textbf{Manual-reset} — требует явного вызова \texttt{ResetEvent()}
+    \item Размер .exe файла больше (включает код библиотеки)
+    \item Все зависимости разрешены на этапе компиляции
+    \item Нет необходимости в отдельных DLL файлах
+    \item Невозможно изменить реализацию без перекомпиляции
 \end{itemize}
 
-В данной работе используются \textbf{auto-reset events} для реализации паттерна "запрос-ответ":
+\subsubsection{Динамическая загрузка (Program 2)}
+
+При динамической загрузке библиотека загружается в память во время выполнения программы с помощью системных вызовов Windows API.
+
+\textbf{Характеристики:}
 \begin{itemize}
-    \item \texttt{EventRequest} — родитель сигнализирует ребенку о новом запросе
-    \item \texttt{EventResponse} — ребенок сигнализирует родителю о готовности ответа
+    \item Размер .exe файла меньше
+    \item Библиотека загружается по требованию
+    \item Можно переключаться между разными реализациями во время выполнения
+    \item Требуется наличие DLL файлов в системе
 \end{itemize}
 
-\subsection{Структура разделяемой памяти}
+\subsection{Системные вызовы Windows API для работы с DLL}
 
-Данные передаются через структуру \texttt{SharedData}:
+\subsubsection{LoadLibraryA()}
+
+Загружает DLL в адресное пространство процесса.
 
 \begin{lstlisting}[language=C++]
-struct SharedData {
-    int number;
-    int response;
-    bool has_request;
-    bool has_response;
-    bool should_terminate;
-};
+HMODULE LoadLibraryA(LPCSTR lpLibFileName);
 \end{lstlisting}
 
-Флаги \texttt{has\_request} и \texttt{has\_response} предотвращают race conditions при доступе к данным.
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{lpLibFileName} — путь к DLL файлу (например, "bubble\_sort.dll")
+\end{itemize}
 
-\subsection{Алгоритм проверки простоты числа}
+\textbf{Возвращает:} Handle модуля (HMODULE) или NULL при ошибке.
 
-Дочерний процесс проверяет число на простоту оптимизированным методом:
+\textbf{Низкоуровневый вызов:} \texttt{LdrLoadDll()} в ntdll.dll
+
+\subsubsection{GetProcAddress()}
+
+Получает адрес экспортируемой функции из загруженной DLL.
 
 \begin{lstlisting}[language=C++]
-bool is_prime(int n) {
-    if (n < 2) return false;
-    if (n == 2) return true;
-    if (n % 2 == 0) return false;
-    
-    for (int i = 3; i * i <= n; i += 2) {
-        if (n % i == 0) return false;
-    }
-    return true;
+FARPROC GetProcAddress(
+    HMODULE hModule,
+    LPCSTR lpProcName
+);
+\end{lstlisting}
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{hModule} — handle модуля, полученный из \texttt{LoadLibraryA()}
+    \item \texttt{lpProcName} — имя функции (например, "Sort")
+\end{itemize}
+
+\textbf{Возвращает:} Указатель на функцию или NULL при ошибке.
+
+\textbf{Низкоуровневый вызов:} \texttt{LdrGetProcedureAddress()} в ntdll.dll
+
+\subsubsection{FreeLibrary()}
+
+Выгружает DLL из памяти процесса.
+
+\begin{lstlisting}[language=C++]
+BOOL FreeLibrary(HMODULE hLibModule);
+\end{lstlisting}
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{hLibModule} — handle модуля для выгрузки
+\end{itemize}
+
+\textbf{Возвращает:} TRUE при успехе, FALSE при ошибке.
+
+\textbf{Низкоуровневый вызов:} \texttt{LdrUnloadDll()} в ntdll.dll
+
+\subsection{Контракт функции сортировки}
+
+Все реализации должны соответствовать единому контракту:
+
+\begin{lstlisting}[language=C++]
+extern "C" {
+    int* Sort(int* array, int size);
 }
 \end{lstlisting}
 
-Сложность: $O(\sqrt{n})$, проверяются только нечетные делители.
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{array} — указатель на массив целых чисел
+    \item \texttt{size} — размер массива
+\end{itemize}
+
+\textbf{Возвращает:} Указатель на отсортированный массив (тот же массив, сортировка in-place).
+
+\textbf{Важно:} Использование \texttt{extern "C"} необходимо для предотвращения name mangling в C++, что позволяет корректно находить функцию через \texttt{GetProcAddress()}.
+
+\subsection{Алгоритмы сортировки}
+
+\subsubsection{Пузырьковая сортировка (Bubble Sort)}
+
+Классический алгоритм сортировки с временной сложностью $O(n^2)$.
+
+\textbf{Алгоритм:}
+\begin{enumerate}
+    \item Проход по массиву от начала до конца
+    \item Сравнение соседних элементов
+    \item Если элементы в неправильном порядке — обмен
+    \item Повторение для всех элементов
+\end{enumerate}
+
+\textbf{Особенности:}
+\begin{itemize}
+    \item Простая реализация
+    \item Стабильная сортировка
+    \item Медленная для больших массивов
+\end{itemize}
+
+\subsubsection{Сортировка Хоара (QuickSort)}
+
+Эффективный алгоритм сортировки с временной сложностью $O(n \log n)$ в среднем случае.
+
+\textbf{Алгоритм:}
+\begin{enumerate}
+    \item Выбор опорного элемента (pivot)
+    \item Разделение массива на две части: элементы меньше pivot и элементы больше pivot
+    \item Рекурсивная сортировка обеих частей
+\end{enumerate}
+
+\textbf{Особенности:}
+\begin{itemize}
+    \item Быстрая сортировка для больших массивов
+    \item Нестабильная сортировка
+    \item Использует схему разбиения Хоара (Hoare partition scheme)
+\end{itemize}
 
 \section{Описание программы}
 
 \subsection{Структура программы}
 
-Программа состоит из двух исполняемых файлов:
+Программа состоит из следующих компонентов:
 
 \begin{itemize}
-    \item \texttt{parent.exe} — родительский процесс
+    \item \textbf{Динамические библиотеки:}
     \begin{itemize}
-        \item Создает file mapping и события
-        \item Запускает дочерний процесс
-        \item Читает файл с числами
-        \item Передает числа через shared memory
-        \item Получает и выводит результаты
+        \item \texttt{bubble\_sort.dll} — реализация пузырьковой сортировки
+        \item \texttt{quicksort.dll} — реализация сортировки Хоара
     \end{itemize}
     
-    \item \texttt{child.exe} — дочерний процесс
+    \item \textbf{Интерфейс:}
     \begin{itemize}
-        \item Открывает существующий file mapping
-        \item Открывает события для синхронизации
-        \item Обрабатывает числа из shared memory
-        \item Отправляет результаты обратно
-        \item Завершается при получении простого или отрицательного числа
+        \item \texttt{sort\_interface.h} — определение контракта функции \texttt{Sort()}
+    \end{itemize}
+    
+    \item \textbf{Тестовые программы:}
+    \begin{itemize}
+        \item \texttt{program1.exe} — статическая линковка (использует bubble\_sort)
+        \item \texttt{program2.exe} — динамическая загрузка (переключение между DLL)
+    \end{itemize}
+    
+    \item \textbf{Общие модули:}
+    \begin{itemize}
+        \item \texttt{common/comm.h} — система логирования с временными метками
+        \item \texttt{common/defines.h} — общие определения
+        \item \texttt{common/errors.h/cpp} — обработка ошибок
     \end{itemize}
 \end{itemize}
 
-\textbf{Общие модули:}
+\subsection{Program 1: Статическая линковка}
+
+Программа использует пузырьковую сортировку, которая статически слинкована на этапе компиляции.
+
+\textbf{Особенности:}
 \begin{itemize}
-    \item \texttt{common/comm.h} — система логирования с временными метками
-    \item \texttt{common/defines.h} — общие определения и подключение Windows API
-    \item \texttt{common/errors.h/cpp} — обработка ошибок через \texttt{ASSERT\_MSG}
+    \item Код сортировки включен в .exe файл
+    \item Нет необходимости в DLL файлах
+    \item Невозможно изменить алгоритм без перекомпиляции
+    \item Больший размер исполняемого файла
 \end{itemize}
 
-\subsection{Используемые системные вызовы Windows API}
-
-\subsubsection{File Mapping}
-
-\textbf{CreateFileMappingA():}
-\begin{lstlisting}[language=C++]
-HANDLE CreateFileMappingA(
-    HANDLE hFile,                     // INVALID_HANDLE_VALUE for memory
-    LPSECURITY_ATTRIBUTES lpAttributes,
-    DWORD flProtect,                  // PAGE_READWRITE
-    DWORD dwMaximumSizeHigh,
-    DWORD dwMaximumSizeLow,           // sizeof(SharedData)
-    LPCSTR lpName                     // "Local\\Lab3SharedMemory"
-);
-\end{lstlisting}
-
-Создает объект file mapping в системной памяти. Родитель создает именованный объект, к которому затем подключается ребенок.
-
-\textbf{OpenFileMappingA():}
-\begin{lstlisting}[language=C++]
-HANDLE OpenFileMappingA(
-    DWORD dwDesiredAccess,            // FILE_MAP_ALL_ACCESS
-    BOOL bInheritHandle,
-    LPCSTR lpName                     // "Local\\Lab3SharedMemory"
-);
-\end{lstlisting}
-
-Открывает существующий именованный file mapping. Используется дочерним процессом.
-
-\textbf{MapViewOfFile():}
-\begin{lstlisting}[language=C++]
-LPVOID MapViewOfFile(
-    HANDLE hFileMappingObject,
-    DWORD dwDesiredAccess,            // FILE_MAP_ALL_ACCESS
-    DWORD dwFileOffsetHigh,
-    DWORD dwFileOffsetLow,
-    SIZE_T dwNumberOfBytesToMap       // sizeof(SharedData)
-);
-\end{lstlisting}
-
-Отображает file mapping в адресное пространство процесса. Возвращает указатель на структуру \texttt{SharedData}.
-
-\textbf{UnmapViewOfFile():}
-\begin{lstlisting}[language=C++]
-BOOL UnmapViewOfFile(LPCVOID lpBaseAddress);
-\end{lstlisting}
-
-Отменяет отображение при завершении работы.
-
-\subsubsection{Синхронизация через Events}
-
-\textbf{CreateEventA():}
-\begin{lstlisting}[language=C++]
-HANDLE CreateEventA(
-    LPSECURITY_ATTRIBUTES lpEventAttributes,
-    BOOL bManualReset,                // FALSE - auto-reset
-    BOOL bInitialState,               // FALSE - non-signaled
-    LPCSTR lpName                     // "Local\\Lab3EventRequest"
-);
-\end{lstlisting}
-
-Создает именованное событие. Auto-reset автоматически сбрасывает событие после \texttt{WaitForSingleObject()}.
-
-\textbf{OpenEventA():}
-\begin{lstlisting}[language=C++]
-HANDLE OpenEventA(
-    DWORD dwDesiredAccess,            // EVENT_ALL_ACCESS
-    BOOL bInheritHandle,
-    LPCSTR lpName                     // "Local\\Lab3EventRequest"
-);
-\end{lstlisting}
-
-Открывает существующее именованное событие (используется child процессом).
-
-\textbf{SetEvent():}
-\begin{lstlisting}[language=C++]
-BOOL SetEvent(HANDLE hEvent);
-\end{lstlisting}
-
-Переводит событие в signaled состояние, разблокируя ожидающий процесс.
-
-\textbf{WaitForSingleObject():}
-\begin{lstlisting}[language=C++]
-DWORD WaitForSingleObject(
-    HANDLE hHandle,
-    DWORD dwMilliseconds              // INFINITE or timeout
-);
-\end{lstlisting}
-
-Блокирует выполнение до перехода объекта в signaled состояние.
-
-\subsubsection{Управление процессами}
-
-\textbf{CreateProcess():}
-\begin{lstlisting}[language=C++]
-BOOL CreateProcess(
-    LPCSTR lpApplicationName,         // "child.exe"
-    LPSTR lpCommandLine,
-    // ... other parameters
-);
-\end{lstlisting}
-
-Создает новый процесс. Родитель запускает дочерний процесс после создания file mapping и событий.
-
-\textbf{GetExitCodeProcess():}
-\begin{lstlisting}[language=C++]
-BOOL GetExitCodeProcess(
-    HANDLE hProcess,
-    LPDWORD lpExitCode
-);
-\end{lstlisting}
-
-Получает код возврата завершившегося процесса.
-
-\subsection{Алгоритм работы родительского процесса}
-
+\textbf{Алгоритм работы:}
 \begin{enumerate}
-    \item Запрос имени файла у пользователя
-    \item Открытие файла для чтения
-    \item Создание file mapping: \texttt{CreateFileMappingA()}
-    \item Отображение в память: \texttt{MapViewOfFile()}
-    \item Инициализация структуры \texttt{SharedData}
-    \item Создание событий: \texttt{CreateEventA()} для Request и Response
-    \item Запуск дочернего процесса: \texttt{CreateProcess("child.exe")}
-    \item Задержка для инициализации child
-    \item Цикл обработки чисел:
+    \item Вывод приветственного сообщения
+    \item Цикл обработки команд:
     \begin{enumerate}
-        \item Чтение числа из файла
-        \item Запись числа в \texttt{pSharedData->number}
-        \item Установка флага \texttt{has\_request = true}
-        \item Сигнал child: \texttt{SetEvent(hEventRequest)}
-        \item Ожидание ответа: \texttt{WaitForSingleObject(hEventResponse, 5000)}
-        \item Проверка таймаута
-        \item Чтение ответа из \texttt{pSharedData->response}
-        \item Вывод результата
-        \item Сброс флага \texttt{has\_response = false}
+        \item Чтение команды из консоли
+        \item Если команда "1" — парсинг чисел и вызов \texttt{Sort()}
+        \item Вывод отсортированного массива
+        \item Если команда "exit" — завершение программы
     \end{enumerate}
-    \item Сигнал завершения: \texttt{should\_terminate = true}
-    \item Ожидание завершения child: \texttt{WaitForSingleObject(pi.hProcess)}
-    \item Получение кода возврата: \texttt{GetExitCodeProcess()}
-    \item Очистка ресурсов:
-    \begin{itemize}
-        \item \texttt{UnmapViewOfFile()}
-        \item \texttt{CloseHandle()} для всех дескрипторов
-    \end{itemize}
 \end{enumerate}
 
-\subsection{Алгоритм работы дочернего процесса}
+\subsection{Program 2: Динамическая загрузка}
 
+Программа загружает DLL во время выполнения и может переключаться между разными реализациями.
+
+\textbf{Особенности:}
+\begin{itemize}
+    \item Класс \texttt{DynamicLibrary} для управления загрузкой DLL
+    \item Переключение между \texttt{bubble\_sort.dll} и \texttt{quicksort.dll} командой "0"
+    \item Меньший размер .exe файла
+    \item Требуется наличие DLL файлов в той же директории
+\end{itemize}
+
+\textbf{Алгоритм работы:}
 \begin{enumerate}
-    \item Открытие file mapping: \texttt{OpenFileMappingA()}
-    \item Отображение в память: \texttt{MapViewOfFile()}
-    \item Открытие событий: \texttt{OpenEventA()} для Request и Response
-    \item Основной цикл:
+    \item Вывод приветственного сообщения
+    \item Загрузка начальной библиотеки (\texttt{bubble\_sort.dll})
+    \item Цикл обработки команд:
     \begin{enumerate}
-        \item Ожидание запроса: \texttt{WaitForSingleObject(hEventRequest, INFINITE)}
-        \item Проверка флага \texttt{should\_terminate} — выход из цикла
-        \item Проверка флага \texttt{has\_request}
-        \item Чтение числа: \texttt{number = pSharedData->number}
-        \item Проверка числа:
+        \item Чтение команды из консоли
+        \item Если команда "0" — переключение между DLL:
         \begin{itemize}
-            \item Если \texttt{number < 0}: установить \texttt{should\_terminate = true}, выход
-            \item Если \texttt{is\_prime(number)}: установить \texttt{should\_terminate = true}, выход
-            \item Если составное: записать в \texttt{pSharedData->response}
+            \item Выгрузка текущей DLL (\texttt{FreeLibrary()})
+            \item Загрузка другой DLL (\texttt{LoadLibraryA()})
+            \item Получение адреса функции (\texttt{GetProcAddress()})
         \end{itemize}
-        \item Установка флагов: \texttt{has\_response = true}, \texttt{has\_request = false}
-        \item Сигнал parent: \texttt{SetEvent(hEventResponse)}
+        \item Если команда "1" — парсинг чисел и вызов функции через указатель
+        \item Вывод отсортированного массива
+        \item Если команда "exit" — выгрузка DLL и завершение
     \end{enumerate}
-    \item Очистка ресурсов:
-    \begin{itemize}
-        \item \texttt{UnmapViewOfFile()}
-        \item \texttt{CloseHandle()} для всех дескрипторов
-    \end{itemize}
 \end{enumerate}
 
-\subsection{Последовательность взаимодействия}
+\subsection{Класс DynamicLibrary}
+
+Класс инкапсулирует работу с динамическими библиотеками:
+
+\begin{lstlisting}[language=C++]
+class DynamicLibrary {
+private:
+    HMODULE hModule;        // Handle загруженной DLL
+    SortFunc sortFunc;      // Указатель на функцию Sort
+    std::string currentLib; // Имя текущей библиотеки
+    
+public:
+    bool load(const std::string& dllPath);  // Загрузка DLL
+    void unload();                          // Выгрузка DLL
+    bool isLoaded() const;                 // Проверка загрузки
+    SortFunc getSortFunc() const;           // Получение указателя
+};
+\end{lstlisting}
+
+\textbf{Метод load():}
+\begin{enumerate}
+    \item Вызов \texttt{unload()} для освобождения предыдущей библиотеки
+    \item Загрузка DLL через \texttt{LoadLibraryA()}
+    \item Проверка успешности загрузки
+    \item Получение адреса функции \texttt{Sort} через \texttt{GetProcAddress()}
+    \item Сохранение handle и указателя на функцию
+\end{enumerate}
+
+\textbf{Метод unload():}
+\begin{enumerate}
+    \item Проверка наличия загруженной библиотеки
+    \item Вызов \texttt{FreeLibrary()}
+    \item Сброс handle и указателя на функцию
+\end{enumerate}
+
+\subsection{Обработка ошибок}
+
+Все критические операции проверяются:
+
+\begin{itemize}
+    \item \textbf{LoadLibraryA()} — проверка возвращаемого значения, при ошибке вывод кода через \texttt{GetLastError()}
+    \item \textbf{GetProcAddress()} — проверка указателя на функцию
+    \item \textbf{Валидация входных данных} — проверка размера массива (максимум 1000 элементов)
+    \item \textbf{Логирование} — все операции логируются через \texttt{LogMsg()} и \texttt{LogErr()}
+\end{itemize}
+
+\subsection{Сборка проекта}
+
+Проект собирается с помощью CMake:
 
 \begin{verbatim}
-Parent                          Child
-  |
-  +- CreateFileMapping()
-  +- MapViewOfFile()
-  +- CreateEvent(Request)
-  +- CreateEvent(Response)
-  +- CreateProcess() ----------> |
-  |                              +- OpenFileMapping()
-  |                              +- MapViewOfFile()
-  |                              +- OpenEvent(Request)
-  |                              +- OpenEvent(Response)
-  |                              +- WaitForSingleObject(Request)
-  |                              |   [WAITING...]
-  +- Write number
-  +- has_request = true
-  +- SetEvent(Request) ----------> |
-  +- WaitForSingleObject(Response)+- Read number
-  |   [WAITING...]               +- Check prime
-  |                              +- Write response
-  |                              +- has_response = true
-  |                              +- SetEvent(Response)
-  |                              +- WaitForSingleObject(Request)
-  |                                  [WAITING...]
-  +- Read response <--------------+
-  +- has_response = false
-  +- [repeat for next number]
+mkdir build
+cd build
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+ninja
 \end{verbatim}
 
-\subsection{Именование объектов в Windows}
-
-Используется префикс \texttt{Local\textbackslash} для именования объектов:
+\textbf{Результаты сборки:}
 \begin{itemize}
-    \item \texttt{Local\textbackslash Lab3SharedMemory} — file mapping
-    \item \texttt{Local\textbackslash Lab3EventRequest} — событие запроса
-    \item \texttt{Local\textbackslash Lab3EventResponse} — событие ответа
+    \item \texttt{bubble\_sort.dll} и \texttt{quicksort.dll} в \texttt{build/}
+    \item \texttt{program1.exe} и \texttt{program2.exe} в \texttt{build/}
+    \item DLL файлы автоматически копируются в директорию \texttt{program2.exe} для динамической загрузки
 \end{itemize}
 
-Префикс \texttt{Local\textbackslash} гарантирует, что объекты создаются в локальном пространстве имён текущего сеанса пользователя. Альтернатива — \texttt{Global\textbackslash} для доступа из разных сеансов.
+\subsection{Использование программ}
 
-\subsection{Обработка ошибок и таймауты}
+\textbf{Program 1 (Статическая линковка):}
+\begin{verbatim}
+> 1 5 2 8 1 3
+Input array: 5 2 8 1 3
+Sorted array: 1 2 3 5 8
+> exit
+\end{verbatim}
 
-\textbf{Проверка системных вызовов:}
-Все критические вызовы проверяются через макрос \texttt{ASSERT\_MSG()}:
-\begin{lstlisting}[language=C++]
-ASSERT_MSG(hMapFile != nullptr, "Can't opern the file");
-\end{lstlisting}
-
-При ошибке выводится сообщение с указанием файла и строки, программа завершается.
-
-\textbf{Таймаут ожидания:}
-Родитель использует таймаут 5 секунд при ожидании ответа:
-\begin{lstlisting}[language=C++]
-DWORD wait_result = WaitForSingleObject(hEventResponse, 5000);
-if (wait_result == WAIT_TIMEOUT) {
-    LogErr("parent", "Timeout");
-    break;
-}
-\end{lstlisting}
-
-Это предотвращает зависание при сбое дочернего процесса.
-
-\subsection{Формат входного файла}
-
-Файл содержит числа (по одному на строку):
-\begin{lstlisting}
-15
-20
-8
-12
-7
-\end{lstlisting}
-
-При обработке этого файла:
-\begin{itemize}
-    \item 15 — составное → возвращается родителю
-    \item 20 — составное → возвращается родителю
-    \item 8 — составное → возвращается родителю
-    \item 12 — составное → возвращается родителю
-    \item 7 — \textbf{простое} → оба процесса завершаются
-\end{itemize}
-
+\textbf{Program 2 (Динамическая загрузка):}
+\begin{verbatim}
+> 0
+Switched to: QuickSort (Hoare)
+> 1 5 2 8 1 3
+Input array: 5 2 8 1 3
+Sorted array: 1 2 3 5 8
+> 0
+Switched to: Bubble Sort
+> exit
+\end{verbatim}
