@@ -1,18 +1,56 @@
 #include "../common/comm.h"
-#include "sort_interface.h"
+#include <cmath>
+#include <iomanip>
 #include <iostream>
-#include <vector>
 #include <sstream>
 #include <string>
 
-// Static linking: library is linked at compile time
-// This program uses bubble_sort implementation (linked statically)
+// Static linking: both implementations are linked at compile time
+// Rectangle method implementation
+static float SinIntegralRectangles(float A, float B, float e) {
+    if (A >= B || e <= 0.0f) {
+        return 0.0f;
+    }
+    
+    float result = 0.0f;
+    float x = A;
+    
+    while (x < B) {
+        float width = (x + e < B) ? e : (B - x);
+        float mid_x = x + width / 2.0f;
+        result += width * sinf(mid_x);
+        x += width;
+    }
+    
+    return result;
+}
+
+// Trapezoidal method implementation
+static float SinIntegralTrapezoids(float A, float B, float e) {
+    if (A >= B || e <= 0.0f) {
+        return 0.0f;
+    }
+    
+    float result = 0.0f;
+    float x = A;
+    
+    while (x < B) {
+        float width = (x + e < B) ? e : (B - x);
+        float f_left = sinf(x);
+        float f_right = sinf(x + width);
+        result += width * (f_left + f_right) / 2.0f;
+        x += width;
+    }
+    
+    return result;
+}
 
 int main() {
     std::cout << "=== Program 1: Static Linking ===" << std::endl;
-    std::cout << "Using: Bubble Sort (statically linked)" << std::endl;
+    std::cout << "Using: Both methods (statically linked)" << std::endl;
     std::cout << "Commands:" << std::endl;
-    std::cout << "  1 <num1> <num2> ... <numN>  - Sort array" << std::endl;
+    std::cout << "  1 <A> <B> <e>  - Calculate integral of sin(x) on [A, B] with step e (Rectangle method)" << std::endl;
+    std::cout << "  2 <A> <B> <e>  - Calculate integral of sin(x) on [A, B] with step e (Trapezoidal method)" << std::endl;
     std::cout << "  exit  - Exit program" << std::endl;
     std::cout << std::endl;
     
@@ -31,44 +69,43 @@ int main() {
         std::string cmd;
         iss >> cmd;
         
-        if (cmd == "1") {
-            std::vector<int> arr;
-            int num;
-            while (iss >> num) {
-                arr.push_back(num);
-            }
-            
-            if (arr.empty()) {
-                LogErr("program1", "No numbers provided");
+        if (cmd == "1" || cmd == "2") {
+            float A, B, e;
+            if (!(iss >> A >> B >> e)) {
+                LogErr("program1", "Invalid arguments. Expected: <A> <B> <e>");
                 continue;
             }
             
-            if (arr.size() > 1000) {
-                LogErr("program1", "Array too large (max 1000 elements)");
+            if (A >= B) {
+                LogErr("program1", "A must be less than B");
                 continue;
             }
             
-            int size = static_cast<int>(arr.size());
-            
-            LogMsg("program1", "Input array:");
-            for (int i = 0; i < size; ++i) {
-                std::cout << arr[i] << " ";
+            if (e <= 0.0f) {
+                LogErr("program1", "Step e must be positive");
+                continue;
             }
-            std::cout << std::endl;
             
-            int* result = Sort(arr.data(), size);
+            float result;
+            std::string method;
             
-            LogMsg("program1", "Sorted array:");
-            for (int i = 0; i < size; ++i) {
-                std::cout << result[i] << " ";
+            if (cmd == "1") {
+                result = SinIntegralRectangles(A, B, e);
+                method = "Rectangle";
+            } else {
+                result = SinIntegralTrapezoids(A, B, e);
+                method = "Trapezoidal";
             }
-            std::cout << std::endl;
+            
+            LogMsg("program1", "Integral of sin(x) on [" + std::to_string(A) + ", " + 
+                   std::to_string(B) + "] with step " + std::to_string(e) + 
+                   " (" + method + " method):");
+            std::cout << "Result: " << std::fixed << std::setprecision(6) << result << std::endl;
         } else {
-            LogErr("program1", "Unknown command. Use '1 <num1> <num2> ... <numN>' or 'exit'");
+            LogErr("program1", "Unknown command. Use '1 <A> <B> <e>', '2 <A> <B> <e>' or 'exit'");
         }
     }
     
     LogMsg("program1", "Exiting...");
     return 0;
 }
-

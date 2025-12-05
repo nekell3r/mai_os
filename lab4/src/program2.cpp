@@ -70,7 +70,8 @@ int main() {
     std::cout << "=== Program 2: Dynamic Loading ===" << std::endl;
     std::cout << "Commands:" << std::endl;
     std::cout << "  0  - Switch between bubble_sort.dll and quicksort.dll" << std::endl;
-    std::cout << "  1 <num1> <num2> ... <numN>  - Sort array" << std::endl;
+    std::cout << "  1 <num1> <num2> ... <numN>  - Sort array using Bubble Sort" << std::endl;
+    std::cout << "  2 <num1> <num2> ... <numN>  - Sort array using QuickSort (Hoare)" << std::endl;
     std::cout << "  exit  - Exit program" << std::endl;
     std::cout << std::endl;
     
@@ -118,7 +119,23 @@ int main() {
                 std::string method = useBubbleSort ? "Bubble Sort" : "QuickSort (Hoare)";
                 LogMsg("program2", "Switched to: " + method);
             }
-        } else if (cmd == "1") {
+        } else if (cmd == "1" || cmd == "2") {
+            // Command "1" uses Bubble Sort, command "2" uses QuickSort
+            bool needBubbleSort = (cmd == "1");
+            
+            // Load appropriate DLL if needed
+            if (needBubbleSort && lib.getCurrentLib() != "bubble_sort.dll") {
+                if (!lib.load("bubble_sort.dll")) {
+                    LogErr("program2", "Failed to load bubble_sort.dll");
+                    continue;
+                }
+            } else if (!needBubbleSort && lib.getCurrentLib() != "quicksort.dll") {
+                if (!lib.load("quicksort.dll")) {
+                    LogErr("program2", "Failed to load quicksort.dll");
+                    continue;
+                }
+            }
+            
             if (!lib.isLoaded()) {
                 LogErr("program2", "Library not loaded");
                 continue;
@@ -142,7 +159,8 @@ int main() {
             
             int size = static_cast<int>(arr.size());
             
-            LogMsg("program2", "Input array:");
+            std::string method = needBubbleSort ? "Bubble Sort" : "QuickSort (Hoare)";
+            LogMsg("program2", "Input array (" + method + "):");
             for (int i = 0; i < size; ++i) {
                 std::cout << arr[i] << " ";
             }
@@ -157,7 +175,7 @@ int main() {
             }
             std::cout << std::endl;
         } else {
-            LogErr("program2", "Unknown command. Use '0', '1 <num1> <num2> ... <numN>' or 'exit'");
+            LogErr("program2", "Unknown command. Use '0', '1 <num1> <num2> ... <numN>', '2 <num1> <num2> ... <numN>' or 'exit'");
         }
     }
     

@@ -1,6 +1,10 @@
 # Лабораторная работа №4 - Динамические библиотеки
 
-**Вариант 9:** Сортировка целочисленного массива
+**Задача 1:** Расчет интеграла функции sin(x) на отрезке [A, B] с шагом e
+- Метод 1: Метод прямоугольников
+- Метод 2: Метод трапеций
+
+**Задача 2 (Вариант 9):** Сортировка целочисленного массива
 - Метод 1: Пузырьковая сортировка
 - Метод 2: Сортировка Хоара (QuickSort)
 
@@ -12,11 +16,14 @@
 lab4/
 ├── common/              # Общие модули (из base)
 ├── src/
-│   ├── sort_interface.h    # Интерфейс (контракт) функции Sort
-│   ├── bubble_sort.cpp     # Реализация пузырьковой сортировки (DLL)
-│   ├── quicksort.cpp       # Реализация QuickSort (DLL)
-│   ├── program1.cpp        # Программа со статической линковкой
-│   └── program2.cpp         # Программа с динамической загрузкой
+│   ├── integral_interface.h  # Интерфейс функции SinIntegral
+│   ├── rectangles.cpp        # Реализация метода прямоугольников (DLL)
+│   ├── trapezoids.cpp        # Реализация метода трапеций (DLL)
+│   ├── sort_interface.h      # Интерфейс функции Sort
+│   ├── bubble_sort.cpp       # Реализация пузырьковой сортировки (DLL)
+│   ├── quicksort.cpp         # Реализация QuickSort (DLL)
+│   ├── program1.cpp          # Программа со статической линковкой (интеграл)
+│   └── program2.cpp          # Программа с динамической загрузкой (сортировка)
 ├── CMakeLists.txt
 └── README.md
 ```
@@ -33,59 +40,86 @@ ninja
 ```
 
 После сборки:
-- `bubble_sort.dll` и `quicksort.dll` в `build/Release/`
-- `program1.exe` и `program2.exe` в `build/Release/`
+- `rectangles.dll` и `trapezoids.dll` в `build/`
+- `bubble_sort.dll` и `quicksort.dll` в `build/`
+- `program1.exe` и `program2.exe` в `build/`
 
 ---
 
 ## Использование
 
-### Program 1 (Статическая линковка)
+### Program 1 (Статическая линковка - Интеграл)
 
 ```powershell
-cd build\Release
+cd build
 .\program1.exe
 ```
 
 **Команды:**
-- `1 <num1> <num2> ... <numN>` - Сортировать массив
+- `1 <A> <B> <e>` - Рассчитать интеграл sin(x) на [A, B] с шагом e (метод прямоугольников)
+- `2 <A> <B> <e>` - Рассчитать интеграл sin(x) на [A, B] с шагом e (метод трапеций)
 - `exit` - Выход
 
 **Пример:**
 ```
-> 1 5 2 8 1 3
-Input array: 5 2 8 1 3
-Sorted array: 1 2 3 5 8
+> 1 0 3.14159 0.1
+23-56-59MSG program1 Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
+Result: 2.00012
+> 2 0 3.14159 0.1
+23-56-59MSG program1 Integral of sin(x) on [0, 3.14159] with step 0.1 (Trapezoidal method):
+Result: 2.00006
 ```
 
-### Program 2 (Динамическая загрузка)
+### Program 2 (Динамическая загрузка - Сортировка)
 
 ```powershell
-cd build\Release
+cd build
 .\program2.exe
 ```
 
 **Команды:**
 - `0` - Переключить между bubble_sort.dll и quicksort.dll
-- `1 <num1> <num2> ... <numN>` - Сортировать массив
+- `1 <num1> <num2> ... <numN>` - Сортировать массив (Bubble Sort)
+- `2 <num1> <num2> ... <numN>` - Сортировать массив (QuickSort)
 - `exit` - Выход
 
 **Пример:**
 ```
-> 0
-Switched to: QuickSort (Hoare)
 > 1 5 2 8 1 3
-Input array: 5 2 8 1 3
-Sorted array: 1 2 3 5 8
+23-56-59MSG program2 Input array (Bubble Sort):
+5 2 8 1 3
+23-56-59MSG program2 Sorted array:
+1 2 3 5 8
+> 2 5 2 8 1 3
+23-56-59MSG program2 Input array (QuickSort (Hoare)):
+5 2 8 1 3
+23-56-59MSG program2 Sorted array:
+1 2 3 5 8
 > 0
-Switched to: Bubble Sort
+23-56-59MSG program2 Switched to: QuickSort (Hoare)
 ```
 
 ---
 
 ## Реализация
 
-### Интерфейс (sort_interface.h)
+### Интерфейс интеграла (integral_interface.h)
+
+```cpp
+extern "C" {
+    float SinIntegral(float A, float B, float e);
+}
+```
+
+### Метод прямоугольников (rectangles.cpp)
+
+Вычисление интеграла методом прямоугольников. Используется значение функции в середине каждого интервала.
+
+### Метод трапеций (trapezoids.cpp)
+
+Вычисление интеграла методом трапеций. Используется среднее значение функции на границах каждого интервала.
+
+### Интерфейс сортировки (sort_interface.h)
 
 ```cpp
 extern "C" {
@@ -221,11 +255,13 @@ ModLoad: ... quicksort.dll
 
 ## Сравнение подходов
 
-| Аспект | Статическая линковка | Динамическая загрузка |
+| Аспект | Статическая линковка (Program 1) | Динамическая загрузка (Program 2) |
 |--------|---------------------|----------------------|
+| Задача | Интеграл sin(x) | Сортировка массива |
 | Время линковки | Компиляция | Выполнение |
-| Размер exe | Больше | Меньше |
-| Гибкость | Низкая | Высокая |
-| Системные вызовы | Нет | LoadLibrary, GetProcAddress |
+| Размер exe | Больше (код включен) | Меньше (только ссылки) |
+| Гибкость | Низкая (фиксированная реализация) | Высокая (переключение реализаций) |
+| Системные вызовы | Нет загрузки DLL | LoadLibrary, GetProcAddress, FreeLibrary |
 | Зависимости | Все в exe | DLL должны быть доступны |
+| Команды | "1" и "2" для разных методов | "0" для переключения, "1" и "2" для разных методов |
 
