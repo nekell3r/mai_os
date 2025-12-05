@@ -1,6 +1,10 @@
 \section{Исходная программа}
 
-\subsection{Интерфейс}
+\subsection{Интерфейсы}
+
+\subsubsection{integral\_interface.h}
+
+\lstinputlisting[language=C++,caption=integral\_interface.h,basicstyle=\tiny\ttfamily]{inc/integral_interface.h}
 
 \subsubsection{sort\_interface.h}
 
@@ -8,13 +12,13 @@
 
 \subsection{Реализации динамических библиотек}
 
-\subsubsection{bubble\_sort.cpp}
+\subsubsection{rectangles.cpp}
 
-\lstinputlisting[language=C++,caption=bubble\_sort.cpp,basicstyle=\small\ttfamily]{inc/bubble_sort.cpp}
+\lstinputlisting[language=C++,caption=rectangles.cpp,basicstyle=\small\ttfamily]{inc/rectangles.cpp}
 
-\subsubsection{quicksort.cpp}
+\subsubsection{trapezoids.cpp}
 
-\lstinputlisting[language=C++,caption=quicksort.cpp,basicstyle=\small\ttfamily]{inc/quicksort.cpp}
+\lstinputlisting[language=C++,caption=trapezoids.cpp,basicstyle=\small\ttfamily]{inc/trapezoids.cpp}
 
 \subsection{Тестовые программы}
 
@@ -40,13 +44,19 @@ D:\programming_projects\mai_os\lab4\build> .\program1.exe
 
 \begin{verbatim}
 === Program 1: Static Linking ===
-Using: Bubble Sort (statically linked)
+Using: rectangles implementation (statically linked)
+  - SinIntegral: Rectangle method
+  - Sort: Bubble Sort
 Commands:
-  1 <num1> <num2> ... <numN>  - Sort array
+  1 <A> <B> <e>  - Calculate integral of sin(x) on [A, B] with step e
+  2 <num1> <num2> ... <numN>  - Sort array
   exit  - Exit program
 
-> 1 5 2 8 1 3
-23-56-59MSG program1 Input array:
+> 1 0 3.14159 0.1
+23-56-59MSG program1 Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
+Result: 2.000830
+> 2 5 2 8 1 3
+23-56-59MSG program1 Input array (Bubble Sort):
 5 2 8 1 3
 23-56-59MSG program1 Sorted array:
 1 2 3 5 8
@@ -54,7 +64,7 @@ Commands:
 23-56-59MSG program1 Exiting...
 \end{verbatim}
 
-Программа успешно использует статически слинкованную функцию сортировки. Код сортировки включен в исполняемый файл на этапе компиляции.
+Программа успешно использует статически слинкованные функции. Код обеих функций включен в исполняемый файл на этапе компиляции.
 
 \subsubsection{Program 2 (Динамическая загрузка)}
 
@@ -69,17 +79,29 @@ D:\programming_projects\mai_os\lab4\build> .\program2.exe
 \begin{verbatim}
 === Program 2: Dynamic Loading ===
 Commands:
-  0  - Switch between bubble_sort.dll and quicksort.dll
-  1 <num1> <num2> ... <numN>  - Sort array
+  0  - Switch between rectangles.dll and trapezoids.dll
+  1 <A> <B> <e>  - Calculate integral of sin(x) on [A, B] with step e
+  2 <num1> <num2> ... <numN>  - Sort array
   exit  - Exit program
 
-23-56-59MSG program2 Library loaded: bubble_sort.dll
+23-56-59MSG program2 Library loaded: rectangles.dll
+> 1 0 3.14159 0.1
+23-56-59MSG program2 Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
+Result: 2.000830
+> 2 5 2 8 1 3
+23-56-59MSG program2 Input array (Bubble Sort):
+5 2 8 1 3
+23-56-59MSG program2 Sorted array:
+1 2 3 5 8
 > 0
 23-56-59MSG program2 Library unloaded
-23-56-59MSG program2 Library loaded: quicksort.dll
-23-56-59MSG program2 Switched to: QuickSort (Hoare)
-> 1 5 2 8 1 3
-23-56-59MSG program2 Input array:
+23-56-59MSG program2 Library loaded: trapezoids.dll
+23-56-59MSG program2 Switched to: Trapezoidal method / QuickSort
+> 1 0 3.14159 0.1
+23-56-59MSG program2 Integral of sin(x) on [0, 3.14159] with step 0.1 (Trapezoidal method):
+Result: 1.998330
+> 2 5 2 8 1 3
+23-56-59MSG program2 Input array (QuickSort (Hoare)):
 5 2 8 1 3
 23-56-59MSG program2 Sorted array:
 1 2 3 5 8
@@ -91,15 +113,36 @@ Commands:
 
 \subsection{Трассировка системных вызовов (WinDbg)}
 
-Для демонстрации использования системных вызовов Windows API программа была запущена под отладчиком WinDbg с установленными breakpoints на ключевые функции уровня NTDLL (Native API).
+Для демонстрации использования системных вызовов Windows API программы были запущены под отладчиком WinDbg с установленными breakpoints на ключевые функции уровня NTDLL (Native API).
 
-\subsubsection{Команды WinDbg}
+\subsubsection{Команды WinDbg для Program 1}
 
 \begin{verbatim}
-cd lab4
-windbg .\build\program2.exe
+cd lab4\build
+windbg .\program1.exe
 
-# Загрузка символов
+.reload
+ld ntdll
+
+# DLL Loading (Native API - NTDLL) - для сравнения
+bp ntdll!LdrLoadDll ".echo === [LOAD] LdrLoadDll (LoadLibraryA) ===; g"
+bp ntdll!LdrGetProcedureAddress ".echo === [PROC] LdrGetProcedureAddress (GetProcAddress) ===; g"
+bp ntdll!LdrUnloadDll ".echo === [FREE] LdrUnloadDll (FreeLibrary) ===; g"
+
+# I/O
+bp ntdll!NtReadFile ".echo === [READ] NtReadFile (console input) ===; g"
+bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile (console output) ===; g"
+
+.logopen trace_lab4_program1.log
+g
+\end{verbatim}
+
+\subsubsection{Команды WinDbg для Program 2}
+
+\begin{verbatim}
+cd lab4\build
+windbg .\program2.exe
+
 .reload
 ld ntdll
 
@@ -120,11 +163,11 @@ bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile (console output) ===; g"
 # Cleanup
 bp ntdll!NtClose ".echo === [CLOSE] NtClose ===; g"
 
-.logopen trace_lab4_full.log
+.logopen trace_lab4_program2.log
 g
 \end{verbatim}
 
-\subsubsection{Результаты трассировки}
+\subsubsection{Результаты трассировки Program 1}
 
 Ниже представлен фрагмент лога с ключевыми системными вызовами (повторяющиеся строки сокращены):
 
@@ -135,15 +178,60 @@ g
 === [WRITE] NtWriteFile (console output) ===
 ... (вывод приветственного сообщения) ...
 
-# Initial DLL load (bubble_sort.dll)
+# User input: "1 0 3.14159 0.1" (integral)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Integral of sin(x)...") ...
+... (calculation happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+
+# User input: "2 5 2 8 1 3" (sort array)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Input array...") ...
+... (sorting happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Sorted array...") ...
+\end{verbatim}
+
+\textbf{Ключевое наблюдение:} В логе Program 1 НЕ будет вызовов \texttt{LdrLoadDll} и \texttt{LdrGetProcedureAddress} для пользовательских библиотек, так как код статически слинкован на этапе компиляции. Это демонстрирует ключевое отличие статической линковки.
+
+\subsubsection{Результаты трассировки Program 2}
+
+Ниже представлен фрагмент лога с ключевыми системными вызовами (повторяющиеся строки сокращены):
+
+\begin{verbatim}
+... (initialization - загрузка системных DLL: advapi32.dll, msvcrt.dll, 
+     sechost.dll, RPCRT4.dll и др.) ...
+
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод приветственного сообщения) ...
+
+# Initial DLL load (rectangles.dll)
 === [LOAD] LdrLoadDll (LoadLibraryA) ===
 === [OPEN] NtOpenSection (DLL) ===
 === [MAP] NtMapViewOfSection (DLL) ===
-ModLoad: 00007ffe`aa090000 00007ffe`aa0b1000   
-        D:\programming_projects\mai_os\lab4\build\bubble_sort.dll
+ModLoad: 00007ffe`9fd60000 00007ffe`9fd81000   
+        D:\programming_projects\mai_os\lab4\build\rectangles.dll
+=== [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [WRITE] NtWriteFile (console output) ===
-... (вывод "Library loaded: bubble_sort.dll") ...
+... (вывод "Library loaded: rectangles.dll") ...
+
+# User input: "1 0 3.14159 0.1" (integral)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Integral of sin(x)...") ...
+... (calculation happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+
+# User input: "2 5 2 8 1 3" (sort array)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Input array...") ...
+... (sorting happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Sorted array...") ...
 
 # User input: "0" (switch DLL)
 === [READ] NtReadFile (console input) ===
@@ -153,27 +241,12 @@ ModLoad: 00007ffe`aa090000 00007ffe`aa0b1000
 === [LOAD] LdrLoadDll (LoadLibraryA) ===
 === [OPEN] NtOpenSection (DLL) ===
 === [MAP] NtMapViewOfSection (DLL) ===
-ModLoad: 00007ffe`aa6b0000 00007ffe`aa6d1000   
-        D:\programming_projects\mai_os\lab4\build\quicksort.dll
+ModLoad: 00007ffe`a9ec0000 00007ffe`a9ee1000   
+        D:\programming_projects\mai_os\lab4\build\trapezoids.dll
+=== [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [WRITE] NtWriteFile (console output) ===
-... (вывод "Switched to: QuickSort (Hoare)") ...
-
-# User input: "1 5 2 8 1 3" (sort array)
-=== [READ] NtReadFile (console input) ===
-=== [WRITE] NtWriteFile (console output) ===
-... (вывод "Input array: 5 2 8 1 3") ...
-... (sorting happens in DLL code - без системных вызовов) ...
-=== [WRITE] NtWriteFile (console output) ===
-... (вывод "Sorted array: 1 2 3 5 8") ...
-
-# User input: "exit"
-=== [READ] NtReadFile (console input) ===
-=== [FREE] LdrUnloadDll (FreeLibrary) ===
-=== [UNMAP] NtUnmapViewOfSection (DLL) ===
-=== [CLOSE] NtClose ===
-=== [WRITE] NtWriteFile (console output) ===
-... (вывод "Exiting...") ...
+... (вывод "Switched to: Trapezoidal method / QuickSort") ...
 \end{verbatim}
 
 \subsubsection{Анализ трассировки}
@@ -187,37 +260,38 @@ ModLoad: 00007ffe`aa6b0000 00007ffe`aa6d1000
     \item Вывод приветственного сообщения через \texttt{NtWriteFile}
 \end{enumerate}
 
-\textbf{Фаза 2: Загрузка пользовательской DLL (bubble\_sort.dll)}
+\textbf{Фаза 2: Загрузка пользовательской DLL (rectangles.dll) — только Program 2}
 \begin{enumerate}
     \item \textbf{LdrLoadDll} — загрузка DLL в память процесса (вызывается из \texttt{LoadLibraryA()})
     \item \textbf{NtOpenSection} — открытие секции DLL в системной памяти
     \item \textbf{NtMapViewOfSection} — отображение DLL в адресное пространство процесса (видно ModLoad сообщение)
+    \item \textbf{LdrGetProcedureAddress} — получение адреса функции \texttt{SinIntegral} (вызывается из \texttt{GetProcAddress()})
     \item \textbf{LdrGetProcedureAddress} — получение адреса функции \texttt{Sort} (вызывается из \texttt{GetProcAddress()})
     \item Множественные \texttt{NtClose} — закрытие дескрипторов, созданных при загрузке
 \end{enumerate}
 
-\textbf{Фаза 3: Переключение DLL (команда "0")}
+\textbf{Фаза 3: Выполнение функций}
+\begin{enumerate}
+    \item \textbf{NtReadFile} — чтение команды и аргументов из консоли
+    \item \textbf{NtWriteFile} — вывод входных данных
+    \item \textbf{Выполнение кода} — происходит в коде DLL без дополнительных системных вызовов (обычный код в адресном пространстве процесса)
+    \item \textbf{NtWriteFile} — вывод результата
+\end{enumerate}
+
+\textbf{Фаза 4: Переключение DLL (команда "0") — только Program 2}
 \begin{enumerate}
     \item \textbf{NtReadFile} — чтение команды из консоли
     \item \textbf{LdrUnloadDll} — выгрузка текущей DLL (вызывается из \texttt{FreeLibrary()})
     \item \textbf{NtUnmapViewOfSection} — отмена отображения DLL из памяти
     \item \textbf{NtClose} — закрытие дескрипторов
-    \item Повторение фазы 2 для загрузки \texttt{quicksort.dll}
-\end{enumerate}
-
-\textbf{Фаза 4: Выполнение сортировки (команда "1")}
-\begin{enumerate}
-    \item \textbf{NtReadFile} — чтение команды и аргументов из консоли
-    \item \textbf{NtWriteFile} — вывод входного массива
-    \item \textbf{Выполнение сортировки} — происходит в коде DLL без дополнительных системных вызовов (обычный код в адресном пространстве процесса)
-    \item \textbf{NtWriteFile} — вывод отсортированного массива
+    \item Повторение фазы 2 для загрузки \texttt{trapezoids.dll}
 \end{enumerate}
 
 \textbf{Фаза 5: Завершение (команда "exit")}
 \begin{enumerate}
     \item \textbf{NtReadFile} — чтение команды выхода
-    \item \textbf{LdrUnloadDll} — выгрузка DLL
-    \item \textbf{NtUnmapViewOfSection} — отмена отображения DLL
+    \item \textbf{LdrUnloadDll} — выгрузка DLL (только Program 2)
+    \item \textbf{NtUnmapViewOfSection} — отмена отображения DLL (только Program 2)
     \item \textbf{NtClose} — закрытие всех дескрипторов
     \item \textbf{NtWriteFile} — вывод сообщения о завершении
 \end{enumerate}
@@ -230,11 +304,11 @@ ModLoad: 00007ffe`aa6b0000 00007ffe`aa6d1000
         \item \texttt{LdrLoadDll} — основная функция загрузки
         \item \texttt{NtOpenSection} — открытие секции DLL
         \item \texttt{NtMapViewOfSection} — маппинг DLL в память
-        \item \texttt{LdrGetProcedureAddress} — получение адреса функции
+        \item \texttt{LdrGetProcedureAddress} — получение адреса функции (дважды — для SinIntegral и Sort)
     \end{itemize}
     Это больше системных вызовов, чем при статической линковке (где все разрешается на этапе компиляции).
     
-    \item \textbf{Выполнение кода DLL:} После загрузки DLL код выполняется напрямую в адресном пространстве процесса. Сортировка массива не требует дополнительных системных вызовов — это обычный пользовательский код.
+    \item \textbf{Выполнение кода DLL:} После загрузки DLL код выполняется напрямую в адресном пространстве процесса. Вычисление интеграла и сортировка массива не требуют дополнительных системных вызовов — это обычный пользовательский код.
     
     \item \textbf{Переключение DLL:} При переключении между библиотеками происходит полная выгрузка одной DLL и загрузка другой. Это включает:
     \begin{itemize}
@@ -245,7 +319,7 @@ ModLoad: 00007ffe`aa6b0000 00007ffe`aa6d1000
     
     \item \textbf{Инициализация процесса:} В начале работы программы загружается множество системных DLL (advapi32.dll, msvcrt.dll и др.). Это нормальное поведение Windows при запуске любого процесса.
     
-    \item \textbf{Сравнение со статической линковкой:} При статической линковке (Program 1) все эти системные вызовы отсутствуют — код сортировки уже включен в .exe файл. Это видно по отсутствию вызовов \texttt{LdrLoadDll} и \texttt{LdrGetProcedureAddress} в Program 1.
+    \item \textbf{Сравнение со статической линковкой:} При статической линковке (Program 1) все эти системные вызовы для пользовательских библиотек отсутствуют — код обеих функций уже включен в .exe файл. Это видно по отсутствию вызовов \texttt{LdrLoadDll} и \texttt{LdrGetProcedureAddress} для пользовательских библиотек в Program 1.
 \end{enumerate}
 
 \subsection{Системные вызовы Windows API}

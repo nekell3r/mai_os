@@ -57,7 +57,7 @@ HMODULE LoadLibraryA(LPCSTR lpLibFileName);
 
 \textbf{Параметры:}
 \begin{itemize}
-    \item \texttt{lpLibFileName} — путь к DLL файлу (например, "bubble\_sort.dll")
+    \item \texttt{lpLibFileName} — путь к DLL файлу (например, "rectangles.dll")
 \end{itemize}
 
 \textbf{Возвращает:} Handle модуля (HMODULE) или NULL при ошибке.
@@ -78,7 +78,7 @@ FARPROC GetProcAddress(
 \textbf{Параметры:}
 \begin{itemize}
     \item \texttt{hModule} — handle модуля, полученный из \texttt{LoadLibraryA()}
-    \item \texttt{lpProcName} — имя функции (например, "Sort")
+    \item \texttt{lpProcName} — имя функции (например, "SinIntegral" или "Sort")
 \end{itemize}
 
 \textbf{Возвращает:} Указатель на функцию или NULL при ошибке.
@@ -102,7 +102,28 @@ BOOL FreeLibrary(HMODULE hLibModule);
 
 \textbf{Низкоуровневый вызов:} \texttt{LdrUnloadDll()} в ntdll.dll
 
-\subsection{Контракт функции сортировки}
+\subsection{Контракты функций}
+
+\subsubsection{Контракт функции интеграла}
+
+Все реализации должны соответствовать единому контракту:
+
+\begin{lstlisting}[language=C++]
+extern "C" {
+    float SinIntegral(float A, float B, float e);
+}
+\end{lstlisting}
+
+\textbf{Параметры:}
+\begin{itemize}
+    \item \texttt{A} — нижний предел интегрирования
+    \item \texttt{B} — верхний предел интегрирования
+    \item \texttt{e} — шаг интегрирования
+\end{itemize}
+
+\textbf{Возвращает:} Значение интеграла функции $\sin(x)$ на отрезке $[A, B]$.
+
+\subsubsection{Контракт функции сортировки}
 
 Все реализации должны соответствовать единому контракту:
 
@@ -121,6 +142,44 @@ extern "C" {
 \textbf{Возвращает:} Указатель на отсортированный массив (тот же массив, сортировка in-place).
 
 \textbf{Важно:} Использование \texttt{extern "C"} необходимо для предотвращения name mangling в C++, что позволяет корректно находить функцию через \texttt{GetProcAddress()}.
+
+\subsection{Алгоритмы численного интегрирования}
+
+\subsubsection{Метод прямоугольников}
+
+Метод численного интегрирования, основанный на аппроксимации функции постоянным значением на каждом интервале.
+
+\textbf{Алгоритм:}
+\begin{enumerate}
+    \item Разбиение отрезка $[A, B]$ на интервалы шириной $e$
+    \item Для каждого интервала вычисление значения функции в середине интервала
+    \item Суммирование площадей прямоугольников: $S = \sum e \cdot f(x_{mid})$
+\end{enumerate}
+
+\textbf{Особенности:}
+\begin{itemize}
+    \item Простая реализация
+    \item Точность зависит от шага $e$
+    \item Использует среднее значение функции на интервале
+\end{itemize}
+
+\subsubsection{Метод трапеций}
+
+Метод численного интегрирования, основанный на аппроксимации функции линейной функцией на каждом интервале.
+
+\textbf{Алгоритм:}
+\begin{enumerate}
+    \item Разбиение отрезка $[A, B]$ на интервалы шириной $e$
+    \item Для каждого интервала вычисление значений функции на границах
+    \item Суммирование площадей трапеций: $S = \sum e \cdot \frac{f(x_i) + f(x_{i+1})}{2}$
+\end{enumerate}
+
+\textbf{Особенности:}
+\begin{itemize}
+    \item Более точный, чем метод прямоугольников
+    \item Использует среднее значение функции на границах интервала
+    \item Точность также зависит от шага $e$
+\end{itemize}
 
 \subsection{Алгоритмы сортировки}
 
@@ -170,19 +229,20 @@ extern "C" {
 \begin{itemize}
     \item \textbf{Динамические библиотеки:}
     \begin{itemize}
-        \item \texttt{bubble\_sort.dll} — реализация пузырьковой сортировки
-        \item \texttt{quicksort.dll} — реализация сортировки Хоара
+        \item \texttt{rectangles.dll} — содержит обе функции: \texttt{SinIntegral} (метод прямоугольников) и \texttt{Sort} (пузырьковая сортировка)
+        \item \texttt{trapezoids.dll} — содержит обе функции: \texttt{SinIntegral} (метод трапеций) и \texttt{Sort} (QuickSort)
     \end{itemize}
     
-    \item \textbf{Интерфейс:}
+    \item \textbf{Интерфейсы:}
     \begin{itemize}
+        \item \texttt{integral\_interface.h} — определение контракта функции \texttt{SinIntegral()}
         \item \texttt{sort\_interface.h} — определение контракта функции \texttt{Sort()}
     \end{itemize}
     
     \item \textbf{Тестовые программы:}
     \begin{itemize}
-        \item \texttt{program1.exe} — статическая линковка (использует bubble\_sort)
-        \item \texttt{program2.exe} — динамическая загрузка (переключение между DLL)
+        \item \texttt{program1.exe} — статическая линковка (использует rectangles, обе функции)
+        \item \texttt{program2.exe} — динамическая загрузка (переключение между rectangles.dll и trapezoids.dll)
     \end{itemize}
     
     \item \textbf{Общие модули:}
@@ -195,11 +255,11 @@ extern "C" {
 
 \subsection{Program 1: Статическая линковка}
 
-Программа использует пузырьковую сортировку, которая статически слинкована на этапе компиляции.
+Программа использует библиотеку \texttt{rectangles}, которая статически слинкована на этапе компиляции. Библиотека содержит обе функции: \texttt{SinIntegral} (метод прямоугольников) и \texttt{Sort} (пузырьковая сортировка).
 
 \textbf{Особенности:}
 \begin{itemize}
-    \item Код сортировки включен в .exe файл
+    \item Код обеих функций включен в .exe файл
     \item Нет необходимости в DLL файлах
     \item Невозможно изменить алгоритм без перекомпиляции
     \item Больший размер исполняемого файла
@@ -211,20 +271,22 @@ extern "C" {
     \item Цикл обработки команд:
     \begin{enumerate}
         \item Чтение команды из консоли
-        \item Если команда "1" — парсинг чисел и вызов \texttt{Sort()}
-        \item Вывод отсортированного массива
+        \item Если команда "1" — парсинг параметров $A$, $B$, $e$ и вызов \texttt{SinIntegral()}
+        \item Если команда "2" — парсинг чисел и вызов \texttt{Sort()}
+        \item Вывод результата
         \item Если команда "exit" — завершение программы
     \end{enumerate}
 \end{enumerate}
 
 \subsection{Program 2: Динамическая загрузка}
 
-Программа загружает DLL во время выполнения и может переключаться между разными реализациями.
+Программа загружает DLL во время выполнения и может переключаться между разными реализациями. Каждая библиотека содержит обе функции.
 
 \textbf{Особенности:}
 \begin{itemize}
     \item Класс \texttt{DynamicLibrary} для управления загрузкой DLL
-    \item Переключение между \texttt{bubble\_sort.dll} и \texttt{quicksort.dll} командой "0"
+    \item Переключение между \texttt{rectangles.dll} и \texttt{trapezoids.dll} командой "0"
+    \item При загрузке библиотеки получаются адреса обеих функций (\texttt{SinIntegral} и \texttt{Sort})
     \item Меньший размер .exe файла
     \item Требуется наличие DLL файлов в той же директории
 \end{itemize}
@@ -232,7 +294,12 @@ extern "C" {
 \textbf{Алгоритм работы:}
 \begin{enumerate}
     \item Вывод приветственного сообщения
-    \item Загрузка начальной библиотеки (\texttt{bubble\_sort.dll})
+    \item Загрузка начальной библиотеки (\texttt{rectangles.dll})
+    \begin{itemize}
+        \item Вызов \texttt{LoadLibraryA("rectangles.dll")}
+        \item Получение адреса \texttt{SinIntegral} через \texttt{GetProcAddress()}
+        \item Получение адреса \texttt{Sort} через \texttt{GetProcAddress()}
+    \end{itemize}
     \item Цикл обработки команд:
     \begin{enumerate}
         \item Чтение команды из консоли
@@ -240,10 +307,11 @@ extern "C" {
         \begin{itemize}
             \item Выгрузка текущей DLL (\texttt{FreeLibrary()})
             \item Загрузка другой DLL (\texttt{LoadLibraryA()})
-            \item Получение адреса функции (\texttt{GetProcAddress()})
+            \item Получение адресов обеих функций (\texttt{GetProcAddress()})
         \end{itemize}
-        \item Если команда "1" — парсинг чисел и вызов функции через указатель
-        \item Вывод отсортированного массива
+        \item Если команда "1" — парсинг параметров и вызов \texttt{SinIntegral()} через указатель
+        \item Если команда "2" — парсинг чисел и вызов \texttt{Sort()} через указатель
+        \item Вывод результата
         \item Если команда "exit" — выгрузка DLL и завершение
     \end{enumerate}
 \end{enumerate}
@@ -255,15 +323,17 @@ extern "C" {
 \begin{lstlisting}[language=C++]
 class DynamicLibrary {
 private:
-    HMODULE hModule;        // Handle загруженной DLL
-    SortFunc sortFunc;      // Указатель на функцию Sort
-    std::string currentLib; // Имя текущей библиотеки
+    HMODULE hModule;           // Handle загруженной DLL
+    IntegralFunc integralFunc; // Указатель на функцию SinIntegral
+    SortFunc sortFunc;          // Указатель на функцию Sort
+    std::string currentLib;    // Имя текущей библиотеки
     
 public:
     bool load(const std::string& dllPath);  // Загрузка DLL
     void unload();                          // Выгрузка DLL
     bool isLoaded() const;                 // Проверка загрузки
-    SortFunc getSortFunc() const;           // Получение указателя
+    IntegralFunc getIntegralFunc() const;   // Получение указателя на SinIntegral
+    SortFunc getSortFunc() const;           // Получение указателя на Sort
 };
 \end{lstlisting}
 
@@ -272,15 +342,16 @@ public:
     \item Вызов \texttt{unload()} для освобождения предыдущей библиотеки
     \item Загрузка DLL через \texttt{LoadLibraryA()}
     \item Проверка успешности загрузки
+    \item Получение адреса функции \texttt{SinIntegral} через \texttt{GetProcAddress()}
     \item Получение адреса функции \texttt{Sort} через \texttt{GetProcAddress()}
-    \item Сохранение handle и указателя на функцию
+    \item Сохранение handle и указателей на функции
 \end{enumerate}
 
 \textbf{Метод unload():}
 \begin{enumerate}
     \item Проверка наличия загруженной библиотеки
     \item Вызов \texttt{FreeLibrary()}
-    \item Сброс handle и указателя на функцию
+    \item Сброс handle и указателей на функции
 \end{enumerate}
 
 \subsection{Обработка ошибок}
@@ -289,8 +360,8 @@ public:
 
 \begin{itemize}
     \item \textbf{LoadLibraryA()} — проверка возвращаемого значения, при ошибке вывод кода через \texttt{GetLastError()}
-    \item \textbf{GetProcAddress()} — проверка указателя на функцию
-    \item \textbf{Валидация входных данных} — проверка размера массива (максимум 1000 элементов)
+    \item \textbf{GetProcAddress()} — проверка указателей на обе функции
+    \item \textbf{Валидация входных данных} — проверка параметров интеграла ($A < B$, $e > 0$) и размера массива (максимум 1000 элементов)
     \item \textbf{Логирование} — все операции логируются через \texttt{LogMsg()} и \texttt{LogErr()}
 \end{itemize}
 
@@ -307,7 +378,7 @@ ninja
 
 \textbf{Результаты сборки:}
 \begin{itemize}
-    \item \texttt{bubble\_sort.dll} и \texttt{quicksort.dll} в \texttt{build/}
+    \item \texttt{rectangles.dll} и \texttt{trapezoids.dll} в \texttt{build/}
     \item \texttt{program1.exe} и \texttt{program2.exe} в \texttt{build/}
     \item DLL файлы автоматически копируются в директорию \texttt{program2.exe} для динамической загрузки
 \end{itemize}
@@ -316,20 +387,36 @@ ninja
 
 \textbf{Program 1 (Статическая линковка):}
 \begin{verbatim}
-> 1 5 2 8 1 3
-Input array: 5 2 8 1 3
-Sorted array: 1 2 3 5 8
+> 1 0 3.14159 0.1
+Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
+Result: 2.000830
+> 2 5 2 8 1 3
+Input array (Bubble Sort):
+5 2 8 1 3
+Sorted array:
+1 2 3 5 8
 > exit
 \end{verbatim}
 
 \textbf{Program 2 (Динамическая загрузка):}
 \begin{verbatim}
+> 1 0 3.14159 0.1
+Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
+Result: 2.000830
+> 2 5 2 8 1 3
+Input array (Bubble Sort):
+5 2 8 1 3
+Sorted array:
+1 2 3 5 8
 > 0
-Switched to: QuickSort (Hoare)
-> 1 5 2 8 1 3
-Input array: 5 2 8 1 3
-Sorted array: 1 2 3 5 8
-> 0
-Switched to: Bubble Sort
+Switched to: Trapezoidal method / QuickSort
+> 1 0 3.14159 0.1
+Integral of sin(x) on [0, 3.14159] with step 0.1 (Trapezoidal method):
+Result: 1.998330
+> 2 5 2 8 1 3
+Input array (QuickSort (Hoare)):
+5 2 8 1 3
+Sorted array:
+1 2 3 5 8
 > exit
 \end{verbatim}

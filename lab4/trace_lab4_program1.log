@@ -1,0 +1,332 @@
+Opened log file 'trace_lab4_program1.log'
+0:000> g
+g
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+ModLoad: 00007ffe`e18f0000 00007ffe`e19a4000   C:\WINDOWS\System32\advapi32.dll
+ModLoad: 00007ffe`e20a0000 00007ffe`e2149000   C:\WINDOWS\System32\msvcrt.dll
+ModLoad: 00007ffe`e1bc0000 00007ffe`e1c66000   C:\WINDOWS\System32\sechost.dll
+ModLoad: 00007ffe`e1aa0000 00007ffe`e1bb8000   C:\WINDOWS\System32\RPCRT4.dll
+ModLoad: 00007ffe`ded80000 00007ffe`ded8c000   C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL
+ModLoad: 00007ffe`df670000 00007ffe`df715000   C:\WINDOWS\System32\bcryptPrimitives.dll
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+ModLoad: 00007ffe`de550000 00007ffe`de56b000   C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+ntdll!NtTerminateProcess+0x14:
+00007ffe`e2682244 c3              ret
+ A B C D E F G H I J K L M N O P Q R S T U V W X Y Z All
+
+. commands:
+   .abandon - abandon the current process
+   .allow_exec_cmds [0|1] - control execution commands
+   .allow_image_mapping [0|1] - control on-demand image file mapping
+   .apply_dbp [<options>] - add current data breakpoint state to a
+                            register context
+   .asm [<options>] - set disassembly options
+   .asm- [<options>] - clear disassembly options
+   .attach <proc> - attach to <proc> at next execution
+   .block { <commands> } - brackets a set of commands for nested execution
+   .bpsync [0|1] - special breakpoint behavior for multithreaded debuggees
+   .break - break out of the enclosing loop
+   .breakin - break into KD
+   .cache [<options>] - virtual memory cache control
+   .call <fn>(<arg1>, <arg2>, ...) - run a function in the debuggee
+   .catch { <commands> } - catch failures in commands
+   .chain - list current extensions
+   .childdbg <0|1> - turn child process debugging on or off
+   .clients - list currently active clients
+   .closehandle [<options>] [<handle>] - close the given handle
+   .codearch <address> - determine the architecture of code at the given address
+   .continue - continue the enclosing loop
+   .copysym [<options>] <path> - copy current symbol files to a directory
+   .cordll [<options>] - control CLR debug DLL
+   .create <command line> - create a new process
+   .createdir [<options>] [<path>] - control process creation options
+   .cxr <address> - dump context record at specified address
+                    k* after this gives cxr stack
+   .dbgdbg - attach a debugger to the current debugger
+   .debug_sw_wow [0|1] - allow interaction with software WOW emulation
+   .detach - detach from the current process/dump
+   .dml_file <file> - output DML content from file
+   .dml_flow <start> <addr> - show basic block code flow
+   .dml_start [<options>] - navigable overview of debugger activities
+   .do { <commands> } (<cond>) - execute <commands> until <cond> is zero
+   .drivers - This command was removed -- use 'lm' or .reload -l)
+   .dump [<options>] <filename> - create a dump file on the host system
+   .dvalloc [<options>] <bytes> - VirtualAlloc memory in the debuggee
+   .dvfree [<options>] <offset> <bytes> - VirtualFree memory in the debuggee
+   .echo ["<string>"|<string>] - echo string
+   .echotime - output debugger time
+   .echotimestamps [0|1] - toggle timestamp output on events
+   .ecxr - dump context record for current exception
+   .excr - dump context record for current exception
+   .effmach [<machine>] - change current machine type
+   .else { <commands> } - if/then/else conditional execution
+   .elsif (<cond>) { <commands> } [<else clauses>] - if/then/else conditional
+                                                     execution
+   .enable_long_status [0|1] - dump LONG types in default base
+   .enable_unicode [0|1] - dump USHORT array/pointers and unicode strings
+   .endsrv <id> - disable the given engine server
+   .endpsrv - cause the current session's remote server to exit
+   .enumtag - enumerate available tagged data
+   .event_code - display cached event instructions
+   .eventlog - display log of recent events
+   .events - display and select available events
+   .eventstr - display any event strings registered by debuggee
+   .exepath [<dir>[;...]] - set executable search path
+   .exepath+ [<dir>[;...]] - append executable search path
+   .expr - control expression evaluator
+   .exptr <address> - do .exr and .cxr for EXCEPTION_POINTERS
+   .exr <address> - dump exception record at specified address
+   .extmatch [<opts>] <pattern> - display all extensions matching pattern
+   .extpath <opts> [<dir>[;...]] - set extension search path
+   .extpath+ <opts> [<dir>[;...]] - append extension search path
+   .f+ - set current stack frame to caller of current frame
+   .f- - set current stack frame to callee of current frame
+   .fiber <address> - sets context of fiber at address
+                      resets context if no address specified
+   .fiximports <pattern> - attempts to link imports for images
+   .fnent <address> - dump function entry for the given code address
+   .fnret <fnaddr> [<retval>] - display formatted return value
+   .for ( <init> ; <cond> ; <step> ) { <commands> } - execute <commands> and
+                                                      <step> until <cond> is
+                                                      zero
+   .force_chpe_effmach [0|1] - force CHPE locals to be relative to the effective machine
+   .force_radix_output [0|1] - dump integer types in default base
+   .force_system_init [<options>] - force pending systems to initialize if possible
+   .force_tb - forcibly allow branch tracing
+   .foreach [opts] ( <alias> { <tcmds> } ) { <ecmds> } - execute <ecmds> for
+                                                         each token in the
+                                                         output of <tcmds>
+   .fpo <options> - control override FPO information
+   .frame [<frame>] - set current stack frame for locals
+   .formats <expr> - displays expression result in many formats
+   .help [<options>] - display this help
+   .holdmem <options> [range] - hold and compare memory data
+   .if (<cond>) { <commands> } [<else clauses>] - if/then/else conditional
+                                                  execution
+   .ignore_missing_pages [0|1] - control kernel summary dump missing
+                                 page error message
+   .imgscan <options> - scan memory for PE images
+   .jdinfo [/u] <jdi_addr> - interpret AeDebug information
+   .kframes <count> - set default stack trace depth
+   .kill - kill the current process
+   .lastevent - display the last event that occurred
+   .leave - exit the enclosing .catch
+   .lines - toggle line symbol loading
+   .load <name> - add this extension DLL to the extension chain
+   .loadby <name> <mod> - add the extension DLL in the module
+                          directory to the extension chain
+   .locale [<locale>] - set the current locale
+   .logfile - display log status
+   .logopen [<file>] - open new log file
+   .logappend [<file>] - append to log file
+   .logclose - close log file
+   .netsyms [0|1] - allow/disallow net symbol paths
+   .netuse [<options>] - manage net connections
+   .noshell - disable shell commands
+   .noversion - disable extension version checking
+   .nvlist - display the set of .NATVIS files loaded into the debugger
+   .nvload <name> - load a .NATVIS file
+   .nvunload <name> - unload a .NATVIS file
+   .nvunloadall - unload all .NATVIS files
+   .ofilter <pattern> - filter debuggee output against the given pattern
+   .ocommand <prefix> - treat output with the given prefix as a command
+   .opendump <file> - open a dump file
+   .outmask <mask> - set bits in the current output mask
+   .outmask- <mask> - clear bits in the current output mask
+   .pacmask [<options>] - display or override current PAC mask
+   .pcmd [<options>] - control per-prompt command
+   .pop [<options>] - pop state
+   .prefer_dml [0|1] - control DML mode default
+   .printf "<format>", <args...> - formatted output
+   .process [<address>] - sets implicit process
+                          resets default if no address specified
+   .process_info - display security related information of current process
+   .prompt_allow [<options>] - control what information can be displayed
+                               at the prompt
+   .push [<options>] - push state
+   .quit_lock [<options>] - locks session against unexpected quit
+   .readmem <file> <range> - read raw memory from a file
+   .record_branches [0|1] - controls recording of processor branching
+   .reload [<image.ext>[=<address>,<size>]] - reload symbols
+   .restart - request a session restart
+   .remote <pipename> - start remote.exe server
+   .secure [0|1] - disallow operations dangerous for the host
+   .scriptdebug [<script name>] - enters the script debugger or starts debugging a script loaded into the debugger
+   .scriptlist - display the set of scripts loaded into the debugger
+   .scriptload <name> - load a script file
+   .scriptproviders - display the set of script providers in the debugger
+   .scriptrun - load a script file and execute its main function
+   .scriptunload <name> - unload a script file
+   .scriptunloadall - unload all script files
+   .veighton - enable the V8 JavaScript provider
+   .veightoff - disable the V8 JavaScript provider
+   .send_file <options> - send files to remote server
+   .server <options> - start engine server
+   .servers - list active remoting servers
+   .setdll <name> - debugger will search for extensions in this DLL first
+   .settings - manage settings
+   .shell [<command>] - execute shell command
+   .show_read_failures [<opts>] - control extra read failure output
+   .show_sym_failures [<opts>] - control extra symbol failure output
+   .sleep <milliseconds> - debugger sleeps for given duration
+                           useful for allowing access to a machine that's
+                           broken in on an ntsd -d
+   .srcfix [<path extra>] - fix source search path
+   .srcfix+ [<path extra>] - append fixed source search path
+   .srcnoisy [0|1] - control verbose source loading output
+   .srcpath [<dir>[;...]] - set source search path
+   .srcpath+ [<dir>[;...]] - append source search path
+   .step_filter [<opts>] ["<pattern>[;<pattern>...]"] - Set symbol patterns
+                                                        to skip when stepping
+   .step_filter+ [<opts>] ["<pattern>[;<pattern>...]"] - Append symbol patterns
+                                                         to skip when stepping
+   .symfix [<localsym>] - fix symbol search path
+   .symfix+ [<localsym>] - append fixed symbol search path
+   .symopt <flags> - set symbol options
+   .symopt+ <flags> - set symbol options
+   .symopt- <flags> - clear symbol options
+   .sympath [<dir>[;...]] - set symbol search path
+   .sympath+ [<dir>[;...]] - append symbol search path
+   .tagmask [<options>] - display or override current pointer tag mask
+   .targetloglevel <level> - sets diagnostic logging level for plug-ins
+   .thread [<address>] - sets context of thread at address
+                         resets default context if no address specified
+   .time - displays session time information
+   .timezone - display timezone information
+   .ttime - displays thread time information
+   .tlist - list running processes
+   .typeopt <flags> - set/clear type options
+   .unload <name> - remove this extension DLL from the list of extension DLLs
+   .unloadall - remove all extension DLLs from the list of extensions DLLs
+   .wake - wake up a .sleep'ing debugger
+   .while (<cond>) { <commands> } - execute <commands> while <cond> is non-zero
+   .writemem <file> <range> - write raw memory to a file
+   .rrestart - register current session for Application Restart
+   .urestart - unregister current session from Application Restart
+   .inline - query the state whether debuggers should query inline functions
+   .stackprovider - query the state whether debugger should query stack dump providers
+   .stkwalk_force_frame_pointer - query or set the state whether debuggers should unwind stack solely based on frame pointer
+   .hideinjectedcode [<on|off|help>] - Hide injected calls from stepping in source mode
+   .enablepackagedebug <packageFullName> - Enable debugging for UWP application.
+   .disablepackagedebug <packageFullName> - Disable debugging for UWP application.
+   .suspendpackage <packageFullName> - Suspends a UWP application.
+   .resumepackage <packageFullName> - Resumes a UWP application.
+   .querypackage <packageFullName> - Displays the state of a UWP application.
+   .querypackages - Lists all UWP applications and their state.
+   .createpackageapp <packageFullName> <appName> [<arguments>] - Enables debugging and launches a UWP application.
+   .terminatepackageapp <packageFullName> - Terminates all processes for UWP application.
+   .activatepackagebgtask <packageFullName> <bgTaskId> - Enables debugging and launches a UWP background task.
+   .findext <search string> - Search the help of all extensions in the extension repository.
+   .etwtrace <-start|-stop> <WPR File> - Starts a tracing session and displays ETW events to debug console
+   .generatedoc <XmlFileName> - Generates an XML documentation file for the registered named models.
+   .lookupxfghash <XFG Hash> [Module] - Looks up an XFG prototype hash from symbols with a given module search pattern (default is all modules with symbols loaded).
+   .extensionnugetfeature [0|1] - control if an EG uses file share or the new Nuget feed). Default is 0.
+   .check_for_gallery_updates - Checks all Nuget or file share extension repositories for updates.
+   .update_ms_nuget_cred_provider [web|artifacts|help] - Updates (if available) Microsoft Nuget Credential Provider.
+
+Use ".hh <command>" or open debugger.chm in the debuggers directory to get
+detailed documentation on a command.
+
+0:000> .logclose
+.logclose
+Closing open log file trace_lab4_program1.log

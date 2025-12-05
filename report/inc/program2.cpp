@@ -1,21 +1,24 @@
 #include "../common/comm.h"
 #include <windows.h>
+#include <iomanip>
 #include <iostream>
 #include <vector>
 #include <sstream>
 #include <string>
 
-// Function pointer type matching Sort signature
+// Function pointer types
+typedef float (*IntegralFunc)(float, float, float);
 typedef int* (*SortFunc)(int*, int);
 
 class DynamicLibrary {
 private:
     HMODULE hModule;
+    IntegralFunc integralFunc;
     SortFunc sortFunc;
     std::string currentLib;
     
 public:
-    DynamicLibrary() : hModule(nullptr), sortFunc(nullptr) {}
+    DynamicLibrary() : hModule(nullptr), integralFunc(nullptr), sortFunc(nullptr) {}
     
     ~DynamicLibrary() {
         unload();
@@ -28,6 +31,15 @@ public:
         if (!hModule) {
             DWORD error = GetLastError();
             LogErr("program2", "Failed to load library: " + dllPath + " (Error: " + std::to_string(error) + ")");
+            return false;
+        }
+        
+        // Get both functions from the library
+        integralFunc = (IntegralFunc)GetProcAddress(hModule, "SinIntegral");
+        if (!integralFunc) {
+            LogErr("program2", "Failed to get SinIntegral function address");
+            FreeLibrary(hModule);
+            hModule = nullptr;
             return false;
         }
         
@@ -48,13 +60,18 @@ public:
         if (hModule) {
             FreeLibrary(hModule);
             hModule = nullptr;
+            integralFunc = nullptr;
             sortFunc = nullptr;
             LogMsg("program2", "Library unloaded");
         }
     }
     
     bool isLoaded() const {
-        return hModule != nullptr && sortFunc != nullptr;
+        return hModule != nullptr && integralFunc != nullptr && sortFunc != nullptr;
+    }
+    
+    IntegralFunc getIntegralFunc() const {
+        return integralFunc;
     }
     
     SortFunc getSortFunc() const {
@@ -64,21 +81,31 @@ public:
     std::string getCurrentLib() const {
         return currentLib;
     }
+    
+    std::string getMethodName() const {
+        if (currentLib == "rectangles.dll") {
+            return "Rectangle method / Bubble Sort";
+        } else if (currentLib == "trapezoids.dll") {
+            return "Trapezoidal method / QuickSort";
+        }
+        return "Unknown";
+    }
 };
 
 int main() {
     std::cout << "=== Program 2: Dynamic Loading ===" << std::endl;
     std::cout << "Commands:" << std::endl;
-    std::cout << "  0  - Switch between bubble_sort.dll and quicksort.dll" << std::endl;
-    std::cout << "  1 <num1> <num2> ... <numN>  - Sort array" << std::endl;
+    std::cout << "  0  - Switch between rectangles.dll and trapezoids.dll" << std::endl;
+    std::cout << "  1 <A> <B> <e>  - Calculate integral of sin(x) on [A, B] with step e" << std::endl;
+    std::cout << "  2 <num1> <num2> ... <numN>  - Sort array" << std::endl;
     std::cout << "  exit  - Exit program" << std::endl;
     std::cout << std::endl;
     
     DynamicLibrary lib;
-    bool useBubbleSort = true;
+    bool useRectangles = true;
     
     // Load initial library
-    if (!lib.load("bubble_sort.dll")) {
+    if (!lib.load("rectangles.dll")) {
         LogErr("program2", "Failed to load initial library. Make sure DLLs are in the same directory.");
         return 1;
     }
@@ -111,14 +138,48 @@ int main() {
         if (cmd.empty()) continue;
         
         if (cmd == "0") {
-            useBubbleSort = !useBubbleSort;
-            std::string dllName = useBubbleSort ? "bubble_sort.dll" : "quicksort.dll";
+            // Switch between libraries
+            useRectangles = !useRectangles;
+            std::string dllName = useRectangles ? "rectangles.dll" : "trapezoids.dll";
             
             if (lib.load(dllName)) {
-                std::string method = useBubbleSort ? "Bubble Sort" : "QuickSort (Hoare)";
-                LogMsg("program2", "Switched to: " + method);
+                LogMsg("program2", "Switched to: " + lib.getMethodName());
             }
+            
         } else if (cmd == "1") {
+            // Integral calculation
+            if (!lib.isLoaded()) {
+                LogErr("program2", "Library not loaded");
+                continue;
+            }
+            
+            float A, B, e;
+            if (!(iss >> A >> B >> e)) {
+                LogErr("program2", "Invalid arguments. Expected: <A> <B> <e>");
+                continue;
+            }
+            
+            if (A >= B) {
+                LogErr("program2", "A must be less than B");
+                continue;
+            }
+            
+            if (e <= 0.0f) {
+                LogErr("program2", "Step e must be positive");
+                continue;
+            }
+            
+            IntegralFunc func = lib.getIntegralFunc();
+            float result = func(A, B, e);
+            
+            std::string method = useRectangles ? "Rectangle" : "Trapezoidal";
+            LogMsg("program2", "Integral of sin(x) on [" + std::to_string(A) + ", " + 
+                   std::to_string(B) + "] with step " + std::to_string(e) + 
+                   " (" + method + " method):");
+            std::cout << "Result: " << std::fixed << std::setprecision(6) << result << std::endl;
+            
+        } else if (cmd == "2") {
+            // Array sorting
             if (!lib.isLoaded()) {
                 LogErr("program2", "Library not loaded");
                 continue;
@@ -142,26 +203,27 @@ int main() {
             
             int size = static_cast<int>(arr.size());
             
-            LogMsg("program2", "Input array:");
+            std::string method = useRectangles ? "Bubble Sort" : "QuickSort (Hoare)";
+            LogMsg("program2", "Input array (" + method + "):");
             for (int i = 0; i < size; ++i) {
                 std::cout << arr[i] << " ";
             }
             std::cout << std::endl;
             
-            SortFunc sortFunc = lib.getSortFunc();
-            int* result = sortFunc(arr.data(), size);
+            SortFunc func = lib.getSortFunc();
+            int* result = func(arr.data(), size);
             
             LogMsg("program2", "Sorted array:");
             for (int i = 0; i < size; ++i) {
                 std::cout << result[i] << " ";
             }
             std::cout << std::endl;
+            
         } else {
-            LogErr("program2", "Unknown command. Use '0', '1 <num1> <num2> ... <numN>' or 'exit'");
+            LogErr("program2", "Unknown command. Use '0', '1 <A> <B> <e>', '2 <num1> <num2> ... <numN>' or 'exit'");
         }
     }
     
     LogMsg("program2", "Exiting...");
     return 0;
 }
-

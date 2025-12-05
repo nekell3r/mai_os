@@ -1,0 +1,314 @@
+Opened log file 'trace_lab4_program2.log'
+0:000> g
+g
+=== [CLOSE] NtClose ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`e18f0000 00007ffe`e19a4000   C:\WINDOWS\System32\advapi32.dll
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`e20a0000 00007ffe`e2149000   C:\WINDOWS\System32\msvcrt.dll
+=== [CLOSE] NtClose ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`e1bc0000 00007ffe`e1c66000   C:\WINDOWS\System32\sechost.dll
+=== [CLOSE] NtClose ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`e1aa0000 00007ffe`e1bb8000   C:\WINDOWS\System32\RPCRT4.dll
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`ded80000 00007ffe`ded8c000   C:\WINDOWS\SYSTEM32\CRYPTBASE.DLL
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`df670000 00007ffe`df715000   C:\WINDOWS\System32\bcryptPrimitives.dll
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`9fd60000 00007ffe`9fd81000   D:\programming_projects\mai_os\lab4\build\rectangles.dll
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [CLOSE] NtClose ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [FREE] LdrUnloadDll (FreeLibrary) ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`a9ec0000 00007ffe`a9ee1000   D:\programming_projects\mai_os\lab4\build\trapezoids.dll
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [FREE] LdrUnloadDll (FreeLibrary) ===
+=== [UNMAP] NtUnmapViewOfSection (DLL) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [WRITE] NtWriteFile (console output) ===
+=== [LOAD] LdrLoadDll (LoadLibraryA) ===
+=== [OPEN] NtOpenSection (DLL) ===
+=== [MAP] NtMapViewOfSection (DLL) ===
+ModLoad: 00007ffe`de550000 00007ffe`de56b000   C:\WINDOWS\SYSTEM32\kernel.appcore.dll
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+=== [CLOSE] NtClose ===
+ntdll!NtTerminateProcess+0x14:
+00007ffe`e2682244 c3              ret
+0:000> .logclose
+.logclose
+Closing open log file trace_lab4_program2.log

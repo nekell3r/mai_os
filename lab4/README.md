@@ -17,13 +17,11 @@ lab4/
 ├── common/              # Общие модули (из base)
 ├── src/
 │   ├── integral_interface.h  # Интерфейс функции SinIntegral
-│   ├── rectangles.cpp        # Реализация метода прямоугольников (DLL)
-│   ├── trapezoids.cpp        # Реализация метода трапеций (DLL)
-│   ├── sort_interface.h      # Интерфейс функции Sort
-│   ├── bubble_sort.cpp       # Реализация пузырьковой сортировки (DLL)
-│   ├── quicksort.cpp         # Реализация QuickSort (DLL)
-│   ├── program1.cpp          # Программа со статической линковкой (интеграл)
-│   └── program2.cpp          # Программа с динамической загрузкой (сортировка)
+│   ├── sort_interface.h       # Интерфейс функции Sort
+│   ├── rectangles.cpp          # Реализация: Rectangle method + Bubble Sort (DLL)
+│   ├── trapezoids.cpp          # Реализация: Trapezoidal method + QuickSort (DLL)
+│   ├── program1.cpp            # Программа со статической линковкой
+│   └── program2.cpp            # Программа с динамической загрузкой
 ├── CMakeLists.txt
 └── README.md
 ```
@@ -40,15 +38,18 @@ ninja
 ```
 
 После сборки:
-- `rectangles.dll` и `trapezoids.dll` в `build/`
-- `bubble_sort.dll` и `quicksort.dll` в `build/`
-- `program1.exe` и `program2.exe` в `build/`
+- `rectangles.dll` - содержит SinIntegral (Rectangle) + Sort (Bubble Sort)
+- `trapezoids.dll` - содержит SinIntegral (Trapezoidal) + Sort (QuickSort)
+- `program1.exe` - статически слинкован с rectangles (обе функции)
+- `program2.exe` - динамически загружает rectangles.dll или trapezoids.dll
 
 ---
 
 ## Использование
 
-### Program 1 (Статическая линковка - Интеграл)
+### Program 1 (Статическая линковка)
+
+Использует библиотеку `rectangles` (Rectangle method + Bubble Sort), слинкованную на этапе компиляции.
 
 ```powershell
 cd build
@@ -56,21 +57,25 @@ cd build
 ```
 
 **Команды:**
-- `1 <A> <B> <e>` - Рассчитать интеграл sin(x) на [A, B] с шагом e (метод прямоугольников)
-- `2 <A> <B> <e>` - Рассчитать интеграл sin(x) на [A, B] с шагом e (метод трапеций)
+- `1 <A> <B> <e>` - Рассчитать интеграл sin(x) на [A, B] с шагом e (Rectangle method)
+- `2 <num1> <num2> ... <numN>` - Сортировать массив (Bubble Sort)
 - `exit` - Выход
 
 **Пример:**
 ```
 > 1 0 3.14159 0.1
 23-56-59MSG program1 Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
-Result: 2.00012
-> 2 0 3.14159 0.1
-23-56-59MSG program1 Integral of sin(x) on [0, 3.14159] with step 0.1 (Trapezoidal method):
-Result: 2.00006
+Result: 2.000830
+> 2 5 2 8 1 3
+23-56-59MSG program1 Input array (Bubble Sort):
+5 2 8 1 3
+23-56-59MSG program1 Sorted array:
+1 2 3 5 8
 ```
 
-### Program 2 (Динамическая загрузка - Сортировка)
+### Program 2 (Динамическая загрузка)
+
+Динамически загружает библиотеки `rectangles.dll` или `trapezoids.dll` во время выполнения.
 
 ```powershell
 cd build
@@ -78,25 +83,31 @@ cd build
 ```
 
 **Команды:**
-- `0` - Переключить между bubble_sort.dll и quicksort.dll
-- `1 <num1> <num2> ... <numN>` - Сортировать массив (Bubble Sort)
-- `2 <num1> <num2> ... <numN>` - Сортировать массив (QuickSort)
+- `0` - Переключить между rectangles.dll и trapezoids.dll
+- `1 <A> <B> <e>` - Рассчитать интеграл sin(x) на [A, B] с шагом e
+- `2 <num1> <num2> ... <numN>` - Сортировать массив
 - `exit` - Выход
 
 **Пример:**
 ```
-> 1 5 2 8 1 3
+> 1 0 3.14159 0.1
+23-56-59MSG program2 Integral of sin(x) on [0, 3.14159] with step 0.1 (Rectangle method):
+Result: 2.000830
+> 2 5 2 8 1 3
 23-56-59MSG program2 Input array (Bubble Sort):
 5 2 8 1 3
 23-56-59MSG program2 Sorted array:
 1 2 3 5 8
+> 0
+23-56-59MSG program2 Switched to: Trapezoidal method / QuickSort
+> 1 0 3.14159 0.1
+23-56-59MSG program2 Integral of sin(x) on [0, 3.14159] with step 0.1 (Trapezoidal method):
+Result: 1.998330
 > 2 5 2 8 1 3
 23-56-59MSG program2 Input array (QuickSort (Hoare)):
 5 2 8 1 3
 23-56-59MSG program2 Sorted array:
 1 2 3 5 8
-> 0
-23-56-59MSG program2 Switched to: QuickSort (Hoare)
 ```
 
 ---
@@ -147,20 +158,61 @@ extern "C" {
 
 ### Трассировка (WinDbg):
 
-```powershell
-cd lab4
-windbg .\build\program2.exe
+Для демонстрации различий между статической и динамической линковкой трассировка проводится для обеих программ.
 
-# Загрузка символов
+#### Program 1 (Статическая линковка)
+
+**Команды для запуска трассировки:**
+
+```powershell
+cd lab4\build
+windbg .\program1.exe
+```
+
+**В WinDbg выполните:**
+
+```
+.reload
+ld ntdll
+
+# DLL Loading (Native API - NTDLL) - для сравнения
+bp ntdll!LdrLoadDll ".echo === [LOAD] LdrLoadDll (LoadLibraryA) ===; g"
+bp ntdll!LdrGetProcedureAddress ".echo === [PROC] LdrGetProcedureAddress (GetProcAddress) ===; g"
+bp ntdll!LdrUnloadDll ".echo === [FREE] LdrUnloadDll (FreeLibrary) ===; g"
+
+# I/O
+bp ntdll!NtReadFile ".echo === [READ] NtReadFile (console input) ===; g"
+bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile (console output) ===; g"
+
+.logopen trace_lab4_program1.log
+g
+```
+
+**Затем в программе выполните:**
+- `1 0 3.14159 0.1` - интеграл
+- `2 5 2 8 1 3` - сортировка
+- `exit` - выход
+
+**Результат:** В логе НЕ будет вызовов `LdrLoadDll` и `LdrGetProcedureAddress` для пользовательских библиотек, так как код статически слинкован на этапе компиляции. Это демонстрирует ключевое отличие статической линковки.
+
+#### Program 2 (Динамическая загрузка)
+
+**Команды для запуска трассировки:**
+
+```powershell
+cd lab4\build
+windbg .\program2.exe
+```
+
+**В WinDbg выполните:**
+
+```
 .reload
 ld ntdll
 
 # DLL Loading (Native API - NTDLL)
-# LdrLoadDll вызывается из LoadLibraryA
 bp ntdll!LdrLoadDll ".echo === [LOAD] LdrLoadDll (LoadLibraryA) ===; g"
-# LdrGetProcedureAddress вызывается из GetProcAddress
 bp ntdll!LdrGetProcedureAddress ".echo === [PROC] LdrGetProcedureAddress (GetProcAddress) ===; g"
-# LdrUnloadDll вызывается из FreeLibrary
 bp ntdll!LdrUnloadDll ".echo === [FREE] LdrUnloadDll (FreeLibrary) ===; g"
 
 # Memory mapping для DLL
@@ -175,8 +227,23 @@ bp ntdll!NtWriteFile ".echo === [WRITE] NtWriteFile (console output) ===; g"
 # Cleanup
 bp ntdll!NtClose ".echo === [CLOSE] NtClose ===; g"
 
-.logopen trace_lab4_full.log
+.logopen trace_lab4_program2.log
 g
+```
+
+**Затем в программе выполните:**
+- `1 0 3.14159 0.1` - интеграл (rectangles.dll)
+- `2 5 2 8 1 3` - сортировка (rectangles.dll)
+- `0` - переключение на trapezoids.dll
+- `1 0 3.14159 0.1` - интеграл (trapezoids.dll)
+- `2 5 2 8 1 3` - сортировка (trapezoids.dll)
+- `exit` - выход
+
+**Результат:** В логе будут видны вызовы `LdrLoadDll`, `LdrGetProcedureAddress` (дважды - для SinIntegral и Sort), `LdrUnloadDll` при переключении библиотек.
+
+**Закрытие лога:**
+```
+.logclose
 ```
 
 **Примечание:** Используются функции NTDLL (Native API), которые вызываются из высокоуровневых функций kernel32:
@@ -195,14 +262,30 @@ g
 === [WRITE] NtWriteFile (console output) ===
 ... (вывод приветственного сообщения) ...
 
-# Initial DLL load (bubble_sort.dll)
+# Initial DLL load (rectangles.dll)
 === [LOAD] LdrLoadDll (LoadLibraryA) ===
 === [OPEN] NtOpenSection (DLL) ===
 === [MAP] NtMapViewOfSection (DLL) ===
-ModLoad: ... bubble_sort.dll
+ModLoad: ... rectangles.dll
+=== [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [WRITE] NtWriteFile (console output) ===
-... (вывод "Library loaded: bubble_sort.dll") ...
+... (вывод "Library loaded: rectangles.dll") ...
+
+# User input: "1 0 3.14159 0.1" (integral)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Integral of sin(x)...") ...
+... (calculation happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+
+# User input: "2 5 2 8 1 3" (sort array)
+=== [READ] NtReadFile (console input) ===
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Input array...") ...
+... (sorting happens in DLL code - без системных вызовов) ...
+=== [WRITE] NtWriteFile (console output) ===
+... (вывод "Sorted array...") ...
 
 # User input: "0" (switch DLL)
 === [READ] NtReadFile (console input) ===
@@ -212,18 +295,11 @@ ModLoad: ... bubble_sort.dll
 === [LOAD] LdrLoadDll (LoadLibraryA) ===
 === [OPEN] NtOpenSection (DLL) ===
 === [MAP] NtMapViewOfSection (DLL) ===
-ModLoad: ... quicksort.dll
+ModLoad: ... trapezoids.dll
+=== [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [PROC] LdrGetProcedureAddress (GetProcAddress) ===
 === [WRITE] NtWriteFile (console output) ===
-... (вывод "Switched to: QuickSort (Hoare)") ...
-
-# User input: "1 5 2 8 1 3" (sort array)
-=== [READ] NtReadFile (console input) ===
-=== [WRITE] NtWriteFile (console output) ===
-... (вывод "Input array: 5 2 8 1 3") ...
-... (sorting happens in DLL code - без системных вызовов) ...
-=== [WRITE] NtWriteFile (console output) ===
-... (вывод "Sorted array: 1 2 3 5 8") ...
+... (вывод "Switched to: Trapezoidal method / QuickSort") ...
 
 # User input: "exit"
 === [READ] NtReadFile (console input) ===

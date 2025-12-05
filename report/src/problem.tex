@@ -30,13 +30,26 @@
 
 В отчете привести исследование работы программы с использованием трассировки системных вызовов (WinDbg). Описать механизмы загрузки динамических библиотек и их использование.
 
-{\bfseries Вариант:} 9
+{\bfseries Вариант:} 8(1 и 9 задачи)
 
-Отсортировать целочисленный массив:
+\textbf{Задача 1:} Вычислить интеграл функции $\sin(x)$ на отрезке $[A, B]$ с шагом $e$:
+\begin{itemize}
+    \item \textbf{Метод 1:} Метод прямоугольников
+    \item \textbf{Метод 2:} Метод трапеций
+\end{itemize}
+
+Контракт функции: \texttt{float SinIntegral(float A, float B, float e)}
+
+\textbf{Задача 9:} Отсортировать целочисленный массив:
 \begin{itemize}
     \item \textbf{Метод 1:} Пузырьковая сортировка
     \item \textbf{Метод 2:} Сортировка Хоара (QuickSort)
 \end{itemize}
 
-Контракт функции: \texttt{Int * Sort(int * array)}
+Контракт функции: \texttt{int* Sort(int* array, int size)}
 
+\textbf{Структура библиотек:}
+\begin{itemize}
+    \item \texttt{rectangles.dll} — содержит обе функции: \texttt{SinIntegral} (метод прямоугольников) и \texttt{Sort} (пузырьковая сортировка)
+    \item \texttt{trapezoids.dll} — содержит обе функции: \texttt{SinIntegral} (метод трапеций) и \texttt{Sort} (QuickSort)
+\end{itemize}
