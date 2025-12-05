@@ -323,17 +323,17 @@ extern "C" {
 \begin{lstlisting}[language=C++]
 class DynamicLibrary {
 private:
-    HMODULE hModule;           // Handle загруженной DLL
-    IntegralFunc integralFunc; // Указатель на функцию SinIntegral
-    SortFunc sortFunc;          // Указатель на функцию Sort
-    std::string currentLib;    // Имя текущей библиотеки
+    HMODULE hModule; 
+    IntegralFunc integralFunc; 
+    SortFunc sortFunc; 
+    std::string currentLib;  
     
 public:
-    bool load(const std::string& dllPath);  // Загрузка DLL
-    void unload();                          // Выгрузка DLL
-    bool isLoaded() const;                 // Проверка загрузки
-    IntegralFunc getIntegralFunc() const;   // Получение указателя на SinIntegral
-    SortFunc getSortFunc() const;           // Получение указателя на Sort
+    bool load(const std::string& dllPath); 
+    void unload();         
+    bool isLoaded() const;          
+    IntegralFunc getIntegralFunc() const; 
+    SortFunc getSortFunc() const; 
 };
 \end{lstlisting}
 
